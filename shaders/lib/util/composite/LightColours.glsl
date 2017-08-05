@@ -1,0 +1,9 @@
+mat2x3 lightColours;
+
+// DIRECT LIGHT
+lightColours[0]  = js_getScatter(vec3(0.0), lightVector, lightVector, 0);
+lightColours[0] *= DIRECT_BRIGHTNESS_NOON * timeVector.x + DIRECT_BRIGHTNESS_NIGHT * timeVector.y + DIRECT_BRIGHTNESS_HORIZON * timeVector.z;
+
+// AMBIENT LIGHT
+lightColours[1]  = js_getScatter(vec3(0.0), upVector, lightVector, 0);
+lightColours[1] *= AMBIENT_BRIGHTNESS;

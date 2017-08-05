@@ -1,0 +1,4 @@
+This shader pack, including its author, is officially hosted through shaderLABs.
+
+Official shaderLABs website: https://www.shaderlabs.com/
+Official shaderLABs Discord: https://discordapp.com/invite/F4BtNAc

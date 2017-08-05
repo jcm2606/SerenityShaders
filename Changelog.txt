@@ -1,0 +1,14 @@
+v1.0
+  Features:
+    - Atmospheric model for the sky.
+    - Atmospheric model for sunlight.
+    - Dynamic shadows.
+    - Coloured shadows.
+    - PCSS.
+    - Caustics.
+    - Screen-space reflections.
+    - GGX reflection model.
+
+  Changes:
+
+  Known bugs:
