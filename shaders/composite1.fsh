@@ -118,7 +118,7 @@ void main() {
   createMaterial(backMaterial, backSurface);
 
   // CREATE FRONT AND BACK FRAMES
-  mat2x3 frames;
+  mat2x3 frames = mat2x3(0);
 
   #define backFrame frames[0]
   #define frontFrame frames[1]

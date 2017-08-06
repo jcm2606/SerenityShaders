@@ -29,7 +29,7 @@ struct Shading {
 
 void getShadows() {
   // CALCULATE SHADOW POSITIONS
-  mat2x3 shadowPosition;
+  mat2x3 shadowPosition = mat2x3(0.0);
 
   #define shadowPositionFront shadowPosition[0]
   #define shadowPositionBack shadowPosition[1]
