@@ -65,6 +65,8 @@ uniform mat4 shadowModelView;
 uniform mat4 shadowModelViewInverse;
 
 uniform int isEyeInWater;
+uniform int worldTime;
+uniform int moonPhase;
 
 uniform ivec2 eyeBrightnessSmooth;
 

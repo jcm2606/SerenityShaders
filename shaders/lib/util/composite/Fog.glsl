@@ -11,7 +11,35 @@
     #include "/lib/util/Noise.glsl"
   #endif
 
-  // FOG
+  // MOISTURE FUNCTIONS
+  float getMoisture(in float dist, in vec3 world) {
+    float moisture = 0.0;
+
+    // HEIGHT
+    moisture += clamp01(exp2(-max0(world.y - MC_SEA_LEVEL) * 0.05));
+
+    // GROUND
+    #define scale 1.0E-124
+    #define stretch vec3(1.0, 2.0, 1.0)
+
+    vec3 move = vec3(1.0, 0.0, 0.0) * frametime * 0.1;
+
+    #define rot(a) mat2(cos(a), -sin(a), sin(a), cos(a))
+    world.xz *= rot(0.7);
+    #undef rot
+
+    float noise  = max0(simplex3D(world * stretch * scale + move));
+          noise += max0(simplex3D(world * stretch * scale * 2.0 + move * 4.0));
+
+    #undef scale
+    #undef stretch
+
+    //moisture += clamp01(exp2(-abs(world.y - MC_SEA_LEVEL) * FOG_GROUND_HEIGHT) * noise * 256.0);
+
+    return moisture;
+  }
+
+  /*
   float getHeightFog(in vec3 world) {
     float fog = 0.0;
 
@@ -60,7 +88,7 @@
   float getWaterFog(in float minDist) {
     return ((isEyeInWater == 1 && linearDepth(position.depthFront, near, far) > minDist)) ? 0.1 : 0.1;
   }
-
+  */
   // SAMPLE
   float distx(in float dist){
     return (far * (dist - near)) / (dist * (far - near));
@@ -77,19 +105,19 @@
     rayDither *= rayStep;
 
     const float maxDist  = FOG_DISTANCE;
-    const float weight   = 1.0 / (maxDist / rayStep);
+    const float weight   = 1.0 / (maxDist / rayStep) * maxDist;
     float minDist  = 0.001;
           minDist += rayDither;
 
     vec3 colour = vec3(0.0);
     int colourSamples = 0;
 
-    vec3 shadowVector = vec3(0.0);
-    float fog         = 0.0;
+    vec4 fogVector = vec4(0.0);
 
-    #define shadowFront shadowVector.x
-    #define shadowBack  shadowVector.y
-    #define shadowDepth shadowVector.z
+    #define shadowFront fogVector.x
+    #define shadowBack  fogVector.y
+    #define shadowDepth fogVector.z
+    #define moisture    fogVector.w
 
     vec3 shadowPosition = vec3(0.0);
     vec3 worldPosition  = vec3(0.0);
@@ -135,39 +163,45 @@
         // INCREMENT COLOUR SAMPLES
         colourSamples++;
 
-        // GENERATE FOG
-        // HEIGHT FOG
-        fog  = getHeightFog(worldPosition);
-
-        // GROUND FOG
-        fog += getGroundFog(worldPosition);
-
-        // WATER FOG
-        if(shadowBack - shadowFront > 0.0 && isWithinThreshold(material, MATERIAL_WATER, 0.01) > 0.5 && shadowPosition.z > shadowDepth) fog += 0.01;
+        // GENERATE MOISTURE
+        moisture = getMoisture(minDist, worldPosition) + moisture;
 
         // INCREASE THE STRENGTH OF THE RAY
-        rayStrength = shadowBack * fog + rayStrength;
+        rayStrength = shadowBack + rayStrength;
       }
     }
 
-    //colourSamples = 1; // TODO: Remove this when I add coloured VL.
+    // WEIGHTS AND DISTANCE SCALING
     colour /= colourSamples;
     colour *= maxDist;
     colour *= 0.015;
 
     rayStrength *= weight;
-    rayStrength *= maxDist;
-    rayStrength *= FOG_THICKNESS_NOON * timeVector.x + FOG_THICKNESS_NIGHT * timeVector.y + mix(FOG_THICKNESS_SUNSET, FOG_THICKNESS_SUNRISE, timeVector.w) * timeVector.z;
+    moisture *= weight;
 
-    outColour = vec3(mix(1.0, FOG_BRIGHTNESS_NIGHT, timeVector.y)) * (
-      direct * FOG_DIRECT_CONTRIBUTION * max(FOG_DIRECT_MINIMUM, pow(max0(dot(fnormalize(position.viewPositionBack), lightVector) * 0.5 + 0.5), FOG_DIRECT_ANISOTROPY)) +
+    // TIME-BASED MOISTURE SCALING
+    moisture *= FOG_THICKNESS_NOON * timeVector.x + FOG_THICKNESS_NIGHT * timeVector.y + mix(FOG_THICKNESS_SUNSET, FOG_THICKNESS_SUNRISE, timeVector.w) * timeVector.z;
+
+    // CYCLE-BASED MOISTURE SCALING
+    #define smoothMoonPhase ( (float(worldTime) + float(moonPhase) * 24000.0) * 0.00000595238095238 )
+
+    moisture *= (sin(smoothMoonPhase * pi)) * 1.5;
+
+    #undef smoothMoonPhase
+
+    // LIGHTING CONTRIBUTION
+    outColour = (
+      direct * FOG_DIRECT_CONTRIBUTION * ( pow(max0(dot(normalize(position.viewPositionBack), lightVector)), FOG_DIRECT_ANISOTROPY) * 2.0 + 1.0 ) / max(1.0, moisture * 0.2) +
       ambient * FOG_AMBIENT_CONTRIBUTION
-    );
+    ) * moisture * 1.0E-4;
 
+    // COLOURED SHADOW APPLICATION
     outColour *= (any(greaterThan(colour, vec3(0.0)))) ? colour : vec3(1.0);
 
+    // COLOURED ALBEDO APPLICATION
     outColour *= (any(greaterThan(frontSurface.albedo, vec3(0.0)))) ? frontSurface.albedo : vec3(1.0);
 
+    // CONVERT OUTPUTS TO LDR
     outColour   = toLDR(outColour, COLOUR_RANGE_FOG);
     rayStrength = pow(rayStrength / COLOUR_RANGE_FOG, inverseGammaCurve);
 
@@ -176,6 +210,7 @@
     #undef shadowFront
     #undef shadowBack
     #undef shadowDepth
+    #undef moisture
 
     #undef rayStrength
     #undef rayStep

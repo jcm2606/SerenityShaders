@@ -94,7 +94,9 @@ void main() {
   fragment.tex0.rgb = toHDR(fragment.tex0.rgb, COLOUR_RANGE_COMPOSITE);
 
   // CALCULATE REFRACTION OFFSET
-  vec2 refractOffset = getRefractionOffset();
+  vec2 refractOffset = vec2(0.0);
+  
+  if(frontMaterial.water > 0.5) refractOffset = getRefractionOffset();
 
   // DRAW REFRACTION
   if(frontMaterial.water > 0.5) fragment.tex0.rgb = drawRefraction(refractOffset);
