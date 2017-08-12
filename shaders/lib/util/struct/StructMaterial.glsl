@@ -23,6 +23,8 @@ struct Material {
   float translucent;
   float ice;
   float stainedGlass;
+
+  float subsurface;
 };
 
 #define MATERIAL_THRESHOLD 0.01
@@ -42,6 +44,8 @@ void createMaterial(inout Material material, inout Surface surface) {
   material.translucent = isWithinThreshold(MATERIAL_TRANSLUCENT, mat, MATERIAL_THRESHOLD);
   material.ice = isWithinThreshold(MATERIAL_ICE, mat, MATERIAL_THRESHOLD);
   material.stainedGlass = isWithinThreshold(MATERIAL_STAINED_GLASS, mat, MATERIAL_THRESHOLD);
+
+  material.subsurface = min1(isWithinThreshold(MATERIAL_SUBSURFACE, mat, MATERIAL_THRESHOLD) + material.foliage);
 }
 
 #undef MATERIAL_THRESHOLD

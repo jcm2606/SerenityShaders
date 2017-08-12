@@ -157,6 +157,8 @@ void main() {
   // SEND FRONT SHADOW DOWN FOR SPECULAR HIGHLIGHT
   fragment.tex0.a = shadingStruct.shadowFront;
 
+  //fragment.tex0.rgb = vec3(max0(1.0 - sqrt(shadingStruct.subsurface * 64.0)));
+
   // CONVERT FRAME TO LDR
   fragment.tex0.rgb = toLDR(fragment.tex0.rgb, COLOUR_RANGE_COMPOSITE);
   

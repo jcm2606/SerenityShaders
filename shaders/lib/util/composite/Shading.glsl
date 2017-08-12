@@ -24,6 +24,9 @@ struct Shading {
   float depthSolid;
   float shadowDifference;
 
+  float subsurface;
+  float material;
+
   vec3 shadowColour;
 } shadingStruct;
 
@@ -82,6 +85,8 @@ void getShadows() {
 
       shadingStruct.shadowDifference += sign(compareShadow(depths.x, shadowPositionBack.z) - compareShadow(depths.y, shadowPositionBack.z));
 
+      shadingStruct.material += texture2D(shadowcolor1, distortShadowPosition(coord + shadowPositionBack.xy, 1)).a;
+
       iter++;
     }
   }
@@ -98,7 +103,9 @@ void getShadows() {
 
   shadingStruct.shadowDifference /= iter;
 
-  //shadingStruct.shadowDifference = (shadingStruct.shadowBack - shadingStruct.shadowSolid);
+  shadingStruct.subsurface = distance(distortShadowPosition(shadowPositionBack, 1), distortShadowPosition(vec3(shadowPositionBack.xy, shadingStruct.depthSolid), 1));
+
+  shadingStruct.material /= iter;
 }
 
 vec3 doShading(in vec3 diffuse, in vec3 direct, in vec3 ambient) {
@@ -108,9 +115,11 @@ vec3 doShading(in vec3 diffuse, in vec3 direct, in vec3 ambient) {
   #define directDiffuse max0(dot(fnormalize(backSurface.normal), lightVector))
   #define ambientDiffuse max0(dot(fnormalize(backSurface.normal), upVector) * 0.45 + 0.55)
 
+  #define subsurfaceDiffuse ( (backMaterial.subsurface > 0.5) ? max0(1.0 - pow(shadingStruct.subsurface * 64.0, 0.25)) * 1.5 : 1.0 )
+
   // TINT DIRECT
   direct *= mix(
-    vec3(shadingStruct.shadowSolid),
+    vec3((backMaterial.subsurface > 0.5) ? 1.0 : shadingStruct.shadowSolid),
     toHDR(shadingStruct.shadowColour, COLOUR_RANGE_SHADOW),
     min1(shadingStruct.shadowDifference)
   );
@@ -118,11 +127,13 @@ vec3 doShading(in vec3 diffuse, in vec3 direct, in vec3 ambient) {
   // ABSORB DIRECT
   if((isEyeInWater == 0 && frontMaterial.water > 0.5) || (isEyeInWater == 1 && frontMaterial.water < 0.5)) direct *= absorbWater(abs(shadingStruct.depthBack - shadingStruct.depthSolid) * 256.0);
 
+  float materialMask = min1(isWithinThreshold(shadingStruct.material, MATERIAL_FOLIAGE, 0.01) + isWithinThreshold(shadingStruct.material, MATERIAL_SUBSURFACE, 0.01));
+
   #if 0
     return vec3(shadingStruct.aux);
   #else
     return diffuse * mix(
-      direct * shadingStruct.shadowBack * mix(directDiffuse, 1.0, backMaterial.foliage) +
+      direct * ((materialMask > 0.5) ? 1.0 : shadingStruct.shadowBack) * mix(directDiffuse, 1.0, backMaterial.subsurface) * subsurfaceDiffuse +
       ambient * ambientDiffuse * pow(backSurface.skyLight, AMBIENT_ATTENUATION) +
       blockLight * pow(backSurface.blockLight, BLOCK_ATTENUATION) * BLOCK_BRIGHTNESS,
       vec3(16.0),
@@ -132,4 +143,6 @@ vec3 doShading(in vec3 diffuse, in vec3 direct, in vec3 ambient) {
 
   #undef directDiffuse
   #undef ambientDiffuse
+
+  #undef subsurfaceDiffuse
 }

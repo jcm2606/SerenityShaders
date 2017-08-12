@@ -69,6 +69,32 @@ void main() {
 
   material = (entity.x == WATER.x || entity.x == WATER.y) ? MATERIAL_WATER : material;
 
+  if(
+    entity.x == SAPLING.x ||
+    entity.x == LEAVES1.x ||
+    entity.x == LEAVES2.x ||
+    entity.x == TALLGRASS.x ||
+    entity.x == DEADBUSH.x ||
+    entity.x == FLOWER_YELLOW.x ||
+    entity.x == FLOWER_RED.x ||
+    entity.x == MUSHROOM_BROWN.x ||
+    entity.x == MUSHROOM_RED.x ||
+    entity.x == WHEAT.x ||
+    entity.x == REEDS.x ||
+    entity.x == VINE.x ||
+    entity.x == LILYPAD.x ||
+    entity.x == NETHERWART.x ||
+    entity.x == CARROTS.x ||
+    entity.x == POTATOES.x ||
+    entity.x == DOUBLE_PLANT.x ||
+    (
+      // Place custom IDs here, replacing 'false'.
+      false
+    )
+  ) material = MATERIAL_FOLIAGE;
+
+  if(entity.x == SNOW.x) material = MATERIAL_SUBSURFACE;
+
   // TODO: Waving terrain.
 
   gl_Position = transMAD(shadowModelView, position).xyzz * diagonal4(gl_ProjectionMatrix) + gl_ProjectionMatrix[3];

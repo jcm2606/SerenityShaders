@@ -4,7 +4,7 @@
 #define DIRECT_MOONLIGHT_SATURATION 0.3
 
 #if DIRECT_MOONLIGHT_COLOUR_OPTION == 0
-  vec3 moonlight = colourSaturation(vec3(0.0, 0.0, 1.0), DIRECT_MOONLIGHT_SATURATION);
+  vec3 moonlight = colourSaturation(vec3(0.0, 0.0, 1.0), DIRECT_MOONLIGHT_SATURATION) * 0.5;
 #endif
 
 #define DIRECT_BRIGHTNESS_NOON    0.008

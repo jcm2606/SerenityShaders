@@ -40,7 +40,7 @@ uniform float sunAngle;
 void main() {
   texcoord = gl_MultiTexCoord0.xy;
 
-  gl_Position = ftransform();
+  gl_Position = transMAD(gl_ModelViewMatrix, gl_Vertex.xyz).xyzz * diagonal4(gl_ProjectionMatrix) + gl_ProjectionMatrix[3];
 
   #include "/lib/util/composite/Vectors.glsl"
 

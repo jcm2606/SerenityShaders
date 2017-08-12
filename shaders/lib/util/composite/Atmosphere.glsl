@@ -77,7 +77,7 @@ vec3 js_getScatter(in vec3 colour, in vec3 V, in vec3 L, in int mode) {
 
   for(int i = 0; i < int(js_steps); i++) {
     scatterS *= js_sunAbsorb;
-    scatterM *= js_moonAbsorb * moonlight * 0.5;
+    scatterM *= js_moonAbsorb * moonlight;
 
     skyColorS = skyColorS * viewAbsorb + scatterS;
     skyColorM = skyColorM * viewAbsorb + scatterM;

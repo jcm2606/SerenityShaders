@@ -19,22 +19,27 @@
     moisture += clamp01(exp2(-max0(world.y - MC_SEA_LEVEL) * 0.05));
 
     // GROUND
-    #define scale 1.0E-124
-    #define stretch vec3(1.0, 2.0, 1.0)
+    #ifdef FOG_GROUND_HQ
+      #define scale 0.3E-1
+      #define stretch vec3(1.0, 2.0, 1.0)
 
-    vec3 move = vec3(1.0, 0.0, 0.0) * frametime * 0.1;
+      vec3 move = vec3(1.0, 0.0, 0.0) * frametime * 0.1;
 
-    #define rot(a) mat2(cos(a), -sin(a), sin(a), cos(a))
-    world.xz *= rot(0.7);
-    #undef rot
+      #define rot(a) mat2(cos(a), -sin(a), sin(a), cos(a))
+      world.xz *= rot(0.7);
+      #undef rot
 
-    float noise  = max0(simplex3D(world * stretch * scale + move));
-          noise += max0(simplex3D(world * stretch * scale * 2.0 + move * 4.0));
+      float noise  = max0(simplex3D(world * stretch * scale + move)) * 0.75 + 0.25;
 
-    #undef scale
-    #undef stretch
+      #undef scale
+      #undef stretch
+    #endif
 
-    //moisture += clamp01(exp2(-abs(world.y - MC_SEA_LEVEL) * FOG_GROUND_HEIGHT) * noise * 256.0);
+    moisture += clamp01(exp2(-abs(world.y - MC_SEA_LEVEL) * FOG_GROUND_HEIGHT)) * 16.0
+      #ifdef FOG_GROUND_HQ
+        * noise
+      #endif
+    ;
 
     return moisture;
   }
@@ -139,14 +144,14 @@
       worldPosition += cameraPosition;
 
       // SAMPLE BACK SHADOW OCCLUSION
-      shadowBack = ceil(compareShadow(texture2D(shadowtex1, shadowPosition.xy).x, shadowPosition.z));
+      shadowBack = (compareShadow(texture2D(shadowtex1, shadowPosition.xy).x, shadowPosition.z));
 
       if(shadowBack > 0.0) {
         // SAMPLE FRONT SHADOW DEPTH
         shadowDepth = texture2DLod(shadowtex0, shadowPosition.xy, 0).x;
 
         // GENERATE FRONT SHADOW OCCLUSION
-        shadowFront = ceil(compareShadow(shadowDepth, shadowPosition.z));
+        shadowFront = (compareShadow(shadowDepth, shadowPosition.z));
 
         // SAMPLE MATERIAL FROM AUXILIARY SHADOW MAP
         material = texture2D(shadowcolor1, shadowPosition.xy).a;
@@ -185,15 +190,15 @@
     // CYCLE-BASED MOISTURE SCALING
     #define smoothMoonPhase ( (float(worldTime) + float(moonPhase) * 24000.0) * 0.00000595238095238 )
 
-    moisture *= (sin(smoothMoonPhase * pi)) * 1.5;
+    moisture += (sin(smoothMoonPhase * pi)) * 64.0;
 
     #undef smoothMoonPhase
 
     // LIGHTING CONTRIBUTION
     outColour = (
-      direct * FOG_DIRECT_CONTRIBUTION * ( pow(max0(dot(normalize(position.viewPositionBack), lightVector)), FOG_DIRECT_ANISOTROPY) * 2.0 + 1.0 ) / max(1.0, moisture * 0.2) +
+      direct * FOG_DIRECT_CONTRIBUTION * ( pow(max0(dot(normalize(position.viewPositionBack), lightVector)), FOG_DIRECT_ANISOTROPY) * 2.0 + 1.0 ) / max(1.0, moisture * 0.05) +
       ambient * FOG_AMBIENT_CONTRIBUTION
-    ) * moisture * 1.0E-4;
+    ) * moisture * 0.3E-4;
 
     // COLOURED SHADOW APPLICATION
     outColour *= (any(greaterThan(colour, vec3(0.0)))) ? colour : vec3(1.0);

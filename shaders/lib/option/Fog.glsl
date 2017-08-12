@@ -34,5 +34,6 @@
 #define FOG_HEIGHT_THICKNESS_LOW  0.5
 
 #define FOG_GROUND
+#define FOG_GROUND_HQ
 #define FOG_GROUND_HEIGHT            0.5
 #define FOG_GROUND_THICKNESS         0.14
