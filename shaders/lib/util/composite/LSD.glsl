@@ -9,8 +9,8 @@ vec3 drawLSDMode(in vec2 texcoord) {
 
   #define coordstep(c,s) (c * s + (1.0 - s))
 
-  coords[0] *= coordstep(sin(flength(coords[0] * 2.0 - 1.0) * 0.75 * pi), 0.0625);
-  coords[2] *= coordstep(cos(flength(coords[2] * 2.0 - 1.0) * flength(coords[0] * 0.5 + 0.5) * pi + frametime * pi * .4), 0.0625);
+  coords[0] *= coordstep(length(abs(coords[0])), 0.5);
+  //coords[2] *= coordstep(cos(flength(coords[2] * 2.0 - 1.0) * flength(coords[0] * 0.5 + 0.5) * pi + frametime * pi * .4), 0.0625);
   //coords[1] *= 1.0 - sin(-flength(coords[1] * 2.0 - 1.0) + frametime * 0.25) * 0.03125 + sin(frametime * 2.0 * sin(pi));
   //coords[2] *= 1.0 - sin(flength(coords[2] * 2.0 - 1.0) * 2.0 * pi + frametime * 1.0) * 0.03125;
 

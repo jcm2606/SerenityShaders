@@ -10,3 +10,5 @@
 #define NORMAL_WATER_TYPE 0        // [0]
 #define NORMAL_ICE_TYPE   0        // [0]
 #define NORMAL_STAINEDGLASS_TYPE 0 // [0]
+
+#define NORMAL_DELTA 0.2

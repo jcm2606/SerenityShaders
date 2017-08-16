@@ -120,34 +120,25 @@ void main() {
   createMaterial(backMaterial, backSurface);
 
   // CREATE FRONT AND BACK FRAMES
-  mat2x3 frames = mat2x3(0);
-
-  #define backFrame frames[0]
-  #define frontFrame frames[1]
-
-  backFrame = backSurface.albedo;
-  frontFrame = frontSurface.albedo;
+  vec3 frame = backSurface.albedo;
 
   // RENDER SKY TO BACK FRAME
-  if(!getLandMask(position.depthBack)) backFrame = drawSky(normalize(position.viewPositionBack), 0);
+  if(!getLandMask(position.depthBack)) frame = drawSky(normalize(position.viewPositionBack), 0);
 
   // CALCULATE LIGHT COLOURS
   #include "/lib/util/composite/LightColours.glsl"
 
   // SHADE BACK FRAME
-  if(getLandMask(position.depthBack)) backFrame = doShading(backFrame, lightColours[0], lightColours[1]);
+  if(getLandMask(position.depthBack)) frame = doShading(frame, lightColours[0], lightColours[1]);
 
   // RENDER DEPTH FOG TO BACK FRAME
-  if(frontMaterial.water > 0.5 || isEyeInWater == 1) backFrame = drawWaterFog(backFrame, lightColours[0]);
+  if(frontMaterial.water > 0.5 || isEyeInWater == 1) frame = drawWaterFog(frame, lightColours[0]);
 
   // TINT BACK FRAME THE COLOUR OF FRONT FRAME
-  backFrame *= (any(greaterThan(frontFrame, vec3(0.0)))) ? frontFrame : vec3(1.0);
+  //backFrame *= (any(greaterThan(frontFrame, vec3(0.0)))) ? frontFrame : vec3(1.0);
 
   // POPULATE FRAME WITH BACK FRAME
-  fragment.tex0.rgb = backFrame;
-
-  #undef backFrame
-  #undef frontFrame
+  fragment.tex0.rgb = frame;
 
   // SAMPLE FOG
   vec3 fogColour = vec3(0.0);

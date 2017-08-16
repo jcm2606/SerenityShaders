@@ -15,7 +15,7 @@ vec3 drawWaterFog(in vec3 diffuse, in vec3 direct) {
 
   return mix(
     diffuse * absorbWater(dist),
-    vec3(0.1, 0.5, 0.8) * mix(0.0, 0.08, min1((1.0 - isEyeInWater) + (eyeBrightnessSmooth.y / 240.0))) * direct,
-    1.0 - exp2(-dist * 0.3)
+    waterColor * mix(0.0, 0.09, min1((1.0 - isEyeInWater) + (eyeBrightnessSmooth.y / 240.0))) * direct * ((isEyeInWater == 0) ? selectSurface().skyLight : 1.0),
+    1.0 - exp2(-dist * 0.5)
   );
 }

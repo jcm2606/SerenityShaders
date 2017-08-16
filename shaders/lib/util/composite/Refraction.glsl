@@ -11,16 +11,14 @@
 #endif
 
 vec2 getRefractionOffset() {
-  float strength  = clamp(linearDepth(position.depthBack, near, far) - linearDepth(position.depthFront, near, far), 0.025, 0.025);
+  float strength  = 0.025;
         strength /= linearDepth(position.depthFront, near, far) * 0.25;
-        strength *= 0.55;
+        strength *= 0.25;
 
   #ifdef REFRACTION_REALISTIC
-    float refractCoeff = (isEyeInWater == 0) ? 1.333 / 1.0003 : 1.0003 / 1.333;
-
-    return -(frontSurface.normal.xy * (refractCoeff * 0.05)) + waterNormal(getWorldPosition(position.viewPositionFront) + cameraPosition).xy * strength;
+    return getNormal(getWorldPosition(position.viewPositionFront) + cameraPosition, frontSurface.material).xy * strength - ((frontSurface.normal.xy / frontSurface.normal.z) * ((isEyeInWater == 0) ? 0.039978 : 0.022512378));
   #else
-    return waterNormal(getWorldPosition(position.viewPositionFront) + cameraPosition).xy * strength;
+    return getNormal(getWorldPosition(position.viewPositionFront) + cameraPosition, frontSurface.material).xy * strength;
   #endif
 }
 
@@ -30,7 +28,7 @@ vec3 drawRefraction(in vec2 offset) {
   if(
     any(greaterThan(abs((texcoord + offset) - 0.5), vec2(0.5))) ||
     (
-      reprojectedMaterial != MATERIAL_WATER
+      reprojectedMaterial != frontSurface.material
     )
   ) offset = vec2(0.0);
 

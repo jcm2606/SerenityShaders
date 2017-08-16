@@ -21,10 +21,10 @@
 #define FOG_BRIGHTNESS_NIGHT 2.0
 
 // FOG OPTIONS
-#define FOG_THICKNESS_NOON      0.8
-#define FOG_THICKNESS_NIGHT     0.8
-#define FOG_THICKNESS_SUNRISE   1.0
-#define FOG_THICKNESS_SUNSET    0.6
+#define FOG_THICKNESS_NOON      0.8 // [0.4 0.6 0.8 1.0 1.2 1.4 1.6 1.8 2.0]
+#define FOG_THICKNESS_NIGHT     0.8 // [0.4 0.6 0.8 1.0 1.2 1.4 1.6 1.8 2.0]
+#define FOG_THICKNESS_SUNRISE   1.2 // [0.4 0.6 0.8 1.0 1.2 1.4 1.6 1.8 2.0]
+#define FOG_THICKNESS_SUNSET    1.0 // [0.4 0.6 0.8 1.0 1.2 1.4 1.6 1.8 2.0]
 
 #define FOG_HEIGHT
 #define FOG_HEIGHT_MIN            0.005

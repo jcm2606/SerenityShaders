@@ -24,7 +24,7 @@ struct Shading {
   float depthSolid;
   float shadowDifference;
 
-  float subsurface;
+  float dist;
   float material;
 
   vec3 shadowColour;
@@ -103,7 +103,7 @@ void getShadows() {
 
   shadingStruct.shadowDifference /= iter;
 
-  shadingStruct.subsurface = distance(distortShadowPosition(shadowPositionBack, 1), distortShadowPosition(vec3(shadowPositionBack.xy, shadingStruct.depthSolid), 1));
+  shadingStruct.dist = distance(shadowPositionBack, vec3(shadowPositionFront.xy, shadingStruct.depthSolid));
 
   shadingStruct.material /= iter;
 }
@@ -115,7 +115,7 @@ vec3 doShading(in vec3 diffuse, in vec3 direct, in vec3 ambient) {
   #define directDiffuse max0(dot(fnormalize(backSurface.normal), lightVector))
   #define ambientDiffuse max0(dot(fnormalize(backSurface.normal), upVector) * 0.45 + 0.55)
 
-  #define subsurfaceDiffuse ( (backMaterial.subsurface > 0.5) ? max0(1.0 - pow(shadingStruct.subsurface * 64.0, 0.25)) * 1.5 : 1.0 )
+  #define subsurfaceDiffuse ( (backMaterial.subsurface > 0.5) ? max0(1.0 - pow(shadingStruct.dist * 64.0, 0.25)) * 1.5 : 1.0 )
 
   // TINT DIRECT
   direct *= mix(

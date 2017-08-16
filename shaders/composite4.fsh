@@ -82,7 +82,9 @@ void main() {
 
   // DRAW DOF
   #ifndef LSD_MODE
-    if(backMaterial.hand < 0.5) fragment.tex0.rgb = doDOF(position.depthBack);
+    #ifdef DOF
+      if(backMaterial.hand < 0.5) fragment.tex0.rgb = doDOF(position.depthBack);
+    #endif
   #endif
 
   // DRAW LSD MODE

@@ -47,18 +47,28 @@ void main() {
   vec4 albedo = texture2D(texture, texcoord) * colour;
   vec4 aux    = vec4(0.0);
 
-  if(material == MATERIAL_WATER) {
-    vec3 normal = waterNormal(worldpos);
+  albedo.rgb = (material == MATERIAL_WATER) ? vec3(1.0) : albedo.rgb;
 
-    albedo.rgb = vec3(mix(
-      mix(0.09, 0.4, clamp01(waterHeight(worldpos))),
+  vec4 caustic = vec4(0.0);
+
+  if(material == MATERIAL_WATER || material == MATERIAL_ICE || material == MATERIAL_STAINED_GLASS) caustic.xyz = getNormal(worldpos, material);
+
+  if(material == MATERIAL_WATER || material == MATERIAL_ICE || material == MATERIAL_STAINED_GLASS) caustic.a = mix(pow(1.0 - caustic.y, 5.5) * 0.25, pow2(1.0 - caustic.y), 0.5);
+
+  if(material == MATERIAL_WATER) {
+    albedo.rgb *= mix(
+      mix(0.09, 0.4, clamp01(getHeight(worldpos, material))),
       0.3,
-      mix(
-        pow(1.0 - normal.z, 2.5),
-        pow2(1.0 - normal.z),
-        0.5
-      )
-    ));
+      caustic.a
+    );
+  }
+
+  if(material == MATERIAL_ICE || material == MATERIAL_STAINED_GLASS) {
+    albedo.rgb *= mix(
+      0.5,
+      1.0,
+      caustic.a
+    );
   }
 
   albedo.rgb = toLDR(albedo.rgb, COLOUR_RANGE_SHADOW);

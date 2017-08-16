@@ -44,12 +44,63 @@ float waterHeight(in vec3 position) {
   #endif
 }
 
-vec3 waterNormal(in vec3 position) {
-  float height0 = waterHeight(position);
+// ICE
+float ice0(in vec3 position) {
+  float height = 0.0;
 
-  const float deltaPos =        0.2;
-  const float inverseDeltaPos = 1.0 / deltaPos;
+  height += simplex3D(position) * 0.5;
+  height += simplex3D(position * 2.0) * 0.25;
+  height += simplex3D(position * 4.0) * 0.25;
 
+  height *= 0.2;
+
+  return height;
+}
+
+float iceHeight(in vec3 position) {
+  #if NORMAL_ICE_TYPE == 0
+    return ice0(position);
+  #else
+    return 0.0;
+  #endif
+}
+
+// STAINED GLASS
+float stainedGlass0(in vec3 position) {
+  float height = 0.0;
+
+  height += simplex3D(position) * 0.5;
+  height += simplex3D(position * 2.0) * 0.25;
+  height += simplex3D(position * 4.0) * 0.25;
+
+  height *= 0.15;
+
+  return height;
+}
+
+float stainedGlassHeight(in vec3 position) {
+  #if NORMAL_ICE_TYPE == 0
+    return stainedGlass0(position);
+  #else
+    return 0.0;
+  #endif
+}
+
+// GENERIC
+float getHeight(in vec3 position, in float material) {
+  return (
+    (isWithinThreshold(material, MATERIAL_WATER, 0.01) > 0.5) ? waterHeight(position) : (
+      (isWithinThreshold(material, MATERIAL_ICE, 0.01) > 0.5) ? iceHeight(position) : (
+        (isWithinThreshold(material, MATERIAL_STAINED_GLASS, 0.01) > 0.5) ? stainedGlassHeight(position) : 0.0
+      )
+    )
+  );
+}
+
+vec3 getNormal(in vec3 position, in float material) {
+  const float inverseDeltaPos = 1.0 / NORMAL_DELTA;
+
+  float height0 = getHeight(position, material);
   vec4 heightVector = vec4(0.0);
 
   #define height1 heightVector.x
@@ -57,10 +108,10 @@ vec3 waterNormal(in vec3 position) {
   #define height3 heightVector.z
   #define height4 heightVector.w
 
-  height1 = waterHeight(position + vec3( deltaPos, 0.0, 0.0));
-  height2 = waterHeight(position + vec3(-deltaPos, 0.0, 0.0));
-  height3 = waterHeight(position + vec3(0.0, 0.0,  deltaPos));
-  height4 = waterHeight(position + vec3(0.0, 0.0, -deltaPos));
+  height1 = getHeight(position + vec3( NORMAL_DELTA, 0.0, 0.0), material);
+  height2 = getHeight(position + vec3(-NORMAL_DELTA, 0.0, 0.0), material);
+  height3 = getHeight(position + vec3(0.0, 0.0,  NORMAL_DELTA), material);
+  height4 = getHeight(position + vec3(0.0, 0.0, -NORMAL_DELTA), material);
 
   vec2 delta = vec2(0.0);
 
@@ -75,12 +126,4 @@ vec3 waterNormal(in vec3 position) {
   #undef height4
 }
 
-// ICE
-vec3 iceNormal(in vec3 position) {
-  return vec3(0.5, 0.5, 1.0);
-}
-
-// STAINED GLASS
-vec3 stainedGlassNormal(in vec3 position) {
-  return vec3(0.5, 0.5, 1.0);
-}
+#undef rot

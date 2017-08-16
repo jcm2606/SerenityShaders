@@ -55,18 +55,17 @@ float ggx(in vec3 view, in vec3 normal, in vec3 light, in float roughness, in fl
 vec3 drawReflection(in vec3 diffuse, in vec3 direct) {
   vec4 reflection = vec4(0.0);
 
-  vec3 view = position.viewPositionFront;
-  vec3 viewdir = -fnormalize(view);
+  vec3 viewdir = -fnormalize(position.viewPositionFront);
   vec3 normal = fnormalize(selectSurface().normal);
   float roughness = selectSurface().roughness;
   float f0 = selectSurface().f0;
   float metallic = (f0 > 0.5) ? 1.0 : 0.0;
 
   // CREATE A REFLECTED DIRECTION
-  vec3 rview = reflect(fnormalize(view), normal);
+  vec3 rview = reflect(fnormalize(position.viewPositionFront), normal);
 
   // PERFORM RAYTRACE OPERATION
-  reflection = raytrace(rview, view);
+  reflection = raytrace(rview, position.viewPositionFront);
 
   // CONVERT RAYTRACED REFLECTION TO HDR
   reflection.rgb = toHDR(reflection.rgb, COLOUR_RANGE_COMPOSITE);
@@ -81,7 +80,7 @@ vec3 drawReflection(in vec3 diffuse, in vec3 direct) {
   reflection.rgb *= ((1.0 - f0) * pow5(1.0 - max0(dot(viewdir, fnormalize(rview + viewdir)))) + f0) * max0(1.0 - pow2(roughness * 1.9));
 
   // APPLY SPECULAR HIGHLIGHT
-  reflection.rgb += direct * ggx(fnormalize(view), normal, lightVector, roughness, metallic, f0) * fragment.tex0.a;
+  reflection.rgb += direct * ggx(fnormalize(position.viewPositionFront), normal, lightVector, roughness, metallic, f0) * fragment.tex0.a;
 
   // APPLY METALLIC TINTING
   reflection.rgb *= (metallic > 0.5) ? selectSurface().albedo : vec3(1.0);

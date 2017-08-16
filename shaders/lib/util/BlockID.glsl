@@ -26,7 +26,7 @@
 
 // TRANSPARENT
 #define ICE vec2(79, 0)
-#define STAINED_GLASS vec2(95, 0)
+#define STAINED_GLASS vec2(95, 160) // x = block, y = pane
 
 // FOLIAGE
 #define SAPLING vec2(6, 0)

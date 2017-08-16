@@ -20,6 +20,8 @@
 #include "/lib/util/PostHeader.glsl"
 
 // CONST
+const bool colortex5MipmapEnabled = true;
+
 // USED BUFFERS
 #define IN_TEX0
 #define IN_TEX1
@@ -96,10 +98,13 @@ void main() {
   // CALCULATE REFRACTION OFFSET
   vec2 refractOffset = vec2(0.0);
   
-  if(frontMaterial.water > 0.5) refractOffset = getRefractionOffset();
+  if(frontMaterial.water > 0.5 || frontMaterial.ice > 0.5 || frontMaterial.stainedGlass > 0.5) refractOffset = getRefractionOffset();
 
   // DRAW REFRACTION
-  if(frontMaterial.water > 0.5) fragment.tex0.rgb = drawRefraction(refractOffset);
+  if(frontMaterial.water > 0.5 || frontMaterial.ice > 0.5 || frontMaterial.stainedGlass > 0.5) fragment.tex0.rgb = drawRefraction(refractOffset);
+
+  // TINT FRAME WITH FRONT ALBEDO
+  fragment.tex0.rgb *= (any(greaterThan(frontSurface.albedo, vec3(0.0)))) ? frontSurface.albedo : vec3(1.0);
 
   // DRAW FOG
   fragment.tex0.rgb = drawFog(fragment.tex0.rgb, texcoord, refractOffset);

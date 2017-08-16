@@ -27,6 +27,8 @@ const int noiseTextureResolution = 256;
 
 //#define LSD_MODE
 
+const vec3 waterColor = vec3(0.1, 0.5, 0.9);
+
 #define GLOBAL_SPEED 1.0 // [0.0625 0.125 0.25 0.5 1.0 2.0 4.0 8.0 16.0]
 
 #define RESOURCE_FORMAT 2 // 0 - Hardcoded. 1 - Specular. 2 - Old PBR, no emissive. 3 - Old PBR, emissive. 4 - New PBR. [0 1 2 3 4]

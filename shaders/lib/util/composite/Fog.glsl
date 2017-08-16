@@ -12,7 +12,7 @@
   #endif
 
   // MOISTURE FUNCTIONS
-  float getMoisture(in float dist, in vec3 world) {
+  float getMoisture(in float dist, in vec3 world, in float material, in float shadowBack, in float shadowFront) {
     float moisture = 0.0;
 
     // HEIGHT
@@ -40,6 +40,12 @@
         * noise
       #endif
     ;
+
+    // WATER
+    moisture += (
+      isEyeInWater == 1 &&
+      dist < linearDepth(position.depthFront, near, far)
+    ) ? 32.0 : 0.0;
 
     return moisture;
   }
@@ -161,6 +167,9 @@
 
         // PERFORM WATER ABSORPTION FOR WATER
         if(shadowBack - shadowFront > 0.0 && isWithinThreshold(material, MATERIAL_WATER, 0.01) > 0.5) colourSample *= absorbWater(abs(shadowDepth - shadowPosition.z) * 256.0);
+
+        // TINT FOG IF FOG IS BEHIND TRANSPARENT SURFACE
+        colourSample *= (any(greaterThan(frontSurface.albedo, vec3(0.0))) && linearDepth(position.depthFront, near, far) < minDist) ? frontSurface.albedo : vec3(1.0);
         
         // ADD TO COLOUR
         colour += colourSample;
@@ -169,7 +178,7 @@
         colourSamples++;
 
         // GENERATE MOISTURE
-        moisture = getMoisture(minDist, worldPosition) + moisture;
+        moisture = getMoisture(minDist, worldPosition, material, shadowBack, shadowFront) + moisture;
 
         // INCREASE THE STRENGTH OF THE RAY
         rayStrength = shadowBack + rayStrength;
@@ -203,9 +212,6 @@
     // COLOURED SHADOW APPLICATION
     outColour *= (any(greaterThan(colour, vec3(0.0)))) ? colour : vec3(1.0);
 
-    // COLOURED ALBEDO APPLICATION
-    outColour *= (any(greaterThan(frontSurface.albedo, vec3(0.0)))) ? frontSurface.albedo : vec3(1.0);
-
     // CONVERT OUTPUTS TO LDR
     outColour   = toLDR(outColour, COLOUR_RANGE_FOG);
     rayStrength = pow(rayStrength / COLOUR_RANGE_FOG, inverseGammaCurve);
@@ -231,13 +237,13 @@
 
     vec4 fog = vec4(0.0);
 
-    float refractCondition = isEyeInWater * frontMaterial.water;
+    float refractCondition = min1(isEyeInWater * frontMaterial.water + (frontMaterial.ice + frontMaterial.stainedGlass));
 
     for(int i = -samples; i <= samples; i++) {
       for(int j = -samples; j <= samples; j++) {
         if(texture2D(depthtex1, vec2(i, j) * blurWidth + texcoord).x - position.depthBack > threshold) continue;
 
-        fog += texture2DLod(colortex5, refractOffset * refractCondition + (vec2(i, j) * blurWidth + texcoord), 0);
+        fog += texture2DLod(colortex5, refractOffset * refractCondition + (vec2(i, j) * blurWidth + texcoord), 1);
 
         blurIterations++;
       }

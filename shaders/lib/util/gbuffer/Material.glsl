@@ -46,7 +46,7 @@ material = 1.0;
   ) material = MATERIAL_ICE;
 
   if(
-    entity.x == STAINED_GLASS.x
+    entity.x == STAINED_GLASS.x || entity.x == STAINED_GLASS.y
   ) material = MATERIAL_STAINED_GLASS;
 #elif SHADER == GBUFFERS_TEXTURED || SHADER == GBUFFERS_TEXTURED_LIT
   material = MATERIAL_PARTICLE;

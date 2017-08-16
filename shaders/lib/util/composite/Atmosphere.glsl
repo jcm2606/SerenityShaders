@@ -72,7 +72,7 @@ vec3 js_getScatter(in vec3 colour, in vec3 V, in vec3 L, in int mode) {
   vec3 js_sunAbsorb = absorb(js_getThickness2(sunVector)*js_steps_inv) * getEarth(sunVector);
   vec3 js_moonAbsorb = absorb(js_getThickness2(moonVector)*js_steps_inv) * getEarth(moonVector);
   
-  vec3 skyColorS = mode != 0 ? vec3(0.0) : colour + (sin(max0(pow4(dotVS) - 0.9935) / 0.015 * pi) * js_sunAbsorb * 200.0);
+  vec3 skyColorS = mode != 0 ? vec3(0.0) : colour + (sin(max0(pow16(dotVS) - 0.9935) / 0.015 * pi) * js_sunAbsorb * 200.0);
   vec3 skyColorM = mode != 0 ? vec3(0.0) : colour + (max0(pow(dotVM, 5000.0)) * 50.0 * moonlight);
 
   for(int i = 0; i < int(js_steps); i++) {

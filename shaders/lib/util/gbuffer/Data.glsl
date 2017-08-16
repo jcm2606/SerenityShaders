@@ -33,9 +33,9 @@ vec3 surfaceNormal = normal;
   surfaceNormal *= tbn;
   surfaceNormal  = fnormalize(surfaceNormal);
 #elif SHADER == GBUFFERS_WATER
-  const float normalMaxAngle = 0.04;
+  const float normalMaxAngle = 0.03;
 
-  surfaceNormal  = waterNormal(getTransparentParallax(worldpos, view, 0.9));
+  surfaceNormal  = getNormal(getTransparentParallax(worldpos, view, material), material);
   surfaceNormal  = surfaceNormal * vec3(normalMaxAngle) + vec3(0.0, 0.0, 1.0 - normalMaxAngle);
   surfaceNormal *= tbn;
   surfaceNormal  = fnormalize(surfaceNormal);
@@ -76,9 +76,7 @@ float emissive = 0.0;
   f0 = 0.02;
   emissive = 0.0;
 #elif SHADER == GBUFFERS_WATER
-  roughness = 0.1;
-  f0 = 0.05;
-  emissive = 0.0;
+  getFallbackPBR(entity, roughness, f0, emissive);
 #endif
 
 buffer1.g = encodeLightMap(vec2(roughness, f0));

@@ -69,6 +69,10 @@ void main() {
 
   material = (entity.x == WATER.x || entity.x == WATER.y) ? MATERIAL_WATER : material;
 
+  material = (entity.x == ICE.x) ? MATERIAL_ICE : material;
+
+  material = (entity.x == STAINED_GLASS.x || entity.x == STAINED_GLASS.y) ? MATERIAL_STAINED_GLASS : material;
+
   if(
     entity.x == SAPLING.x ||
     entity.x == LEAVES1.x ||
