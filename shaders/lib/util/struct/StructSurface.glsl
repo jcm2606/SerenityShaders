@@ -15,6 +15,8 @@ struct Surface {
   float blockLight;
   float material;
 
+  vec4 pbr;
+
   float roughness;
   float f0; // Under the old PBR format, this represents metalness.
   float emissive;
@@ -37,16 +39,11 @@ void createSurface(inout Surface surface, in vec4 buffer0, in vec4 buffer1, in v
   // NORMAL
   surface.normal = decodeNormal(buffer1.r);
 
-  vec2 pbr0 = decodeLightMap(buffer1.g);
-  // ROUGHNESS
-  surface.roughness = pbr0.x;
+  surface.pbr = vec4(decodeLightMap(buffer1.g), decodeLightMap(buffer1.b));
 
-  // F0
-  surface.f0 = pbr0.y;
-
-  vec2 pbr1 = decodeLightMap(buffer1.b);
-  // EMISSIVE
-  surface.emissive = pbr1.x;
+  surface.roughness = surface.pbr.x;
+  surface.f0 = surface.pbr.y;
+  surface.emissive = surface.pbr.z;
 }
 
 void createSurfaces(inout Surface frontSurface, inout Surface backSurface, inout Fragment fragment, in vec2 texcoord) {

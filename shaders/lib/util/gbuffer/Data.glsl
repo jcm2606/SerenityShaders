@@ -1,3 +1,15 @@
+// NORMAL MAP
+#if   SHADER == GBUFFERS_TERRAIN || SHADER == GBUFFERS_HAND
+  vec4 normalMap = texture2D(normals, uvcoord);
+#else
+  vec4 normalMap = vec4(0.0);
+#endif
+
+// PUDDLES
+#if SHADER == GBUFFERS_TERRAIN || SHADER == GBUFFERS_ENTITIES
+  float puddle = getPuddles(worldpos, lmcoord.y, normalMap.a);
+#endif
+
 // ALBEDO
 vec4 albedo = vec4(0.0);
 
@@ -11,6 +23,12 @@ vec4 albedo = vec4(0.0);
   if(material == MATERIAL_WATER) albedo = vec4(0.0);
 #elif SHADER == GBUFFERS_SKYBASIC
   albedo = colour;
+#elif SHADER == GBUFFERS_WEATHER
+  albedo = vec4(vec3(0.8, 0.85, 0.9), texture2D(texture, uvcoord).a);
+#endif
+
+#if SHADER == GBUFFERS_TERRAIN || SHADER == GBUFFERS_ENTITIES
+  //albedo.rgb = vec3(puddle);
 #endif
 
 buffer0.r = encodeColor(albedo.rgb);
@@ -25,10 +43,10 @@ buffer0.b = material;
 vec3 surfaceNormal = normal;
 
 #if   SHADER == GBUFFERS_TERRAIN || SHADER == GBUFFERS_HAND
-  const float normalMaxAngle = 1.0;
+  float normalMaxAngle = mix(0.5, 0.0, puddle);
   //normalMaxAngle = normalMaxAngle * (1.0 - wetness * lmcoord.y * 0.65);
 
-  surfaceNormal  = texture2D(normals, uvcoord).rgb * 2.0 - 1.0;
+  surfaceNormal  = normalMap.rgb * 2.0 - 1.0;
   surfaceNormal  = surfaceNormal * vec3(normalMaxAngle) + vec3(0.0, 0.0, 1.0 - normalMaxAngle);
   surfaceNormal *= tbn;
   surfaceNormal  = fnormalize(surfaceNormal);
@@ -79,13 +97,21 @@ float emissive = 0.0;
   getFallbackPBR(entity, roughness, f0, emissive);
 #endif
 
+#if SHADER == GBUFFERS_TERRAIN || SHADER == GBUFFERS_ENTITIES
+#if 1
+  roughness = mix(roughness, PBR_WATER.x, puddle);
+  f0 = (f0 >= 0.5) ? f0 : mix(f0, PBR_WATER.y, puddle);
+  emissive = mix(emissive, PBR_WATER.z, puddle);
+#endif
+#endif
+
 buffer1.g = encodeLightMap(vec2(roughness, f0));
 buffer1.b = encodeLightMap(vec2(emissive, 0.0));
 
 // HANDLING ALPHA
 #if SHADER == GBUFFERS_WATER
   buffer0.a = 1.0;
-#elif SHADER == GBUFFERS_TEXTURED || SHADER == GBUFFERS_TEXTUREDLIT || SHADER == GBUFFERS_HAND
+#elif SHADER == GBUFFERS_TEXTURED || SHADER == GBUFFERS_TEXTUREDLIT || SHADER == GBUFFERS_HAND || SHADER == GBUFFERS_WEATHER
   buffer0.a = sign(albedo.a);
 #else
   buffer0.a = albedo.a;

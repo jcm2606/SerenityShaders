@@ -28,7 +28,7 @@ vec4 raytrace(vec3 dir,vec3 position){
 
     for (int i = 0; i < int(quality); i++) {
         spos = stepv * min( float(i+1) + dither - .5, quality ) + clipPosition;
-        if( texture2D(depthtex1,spos.xy).x < spos.z )
+        if( texture2D(depthtex0,spos.xy).x < spos.z )
             break;
     }
 

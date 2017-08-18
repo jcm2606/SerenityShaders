@@ -19,5 +19,5 @@
 
 #include "/lib/util/PostHeader.glsl"
 
-/* DRAWBUFFERS:12 */
+/* DRAWBUFFERS:34 */
 #include "/gbuffers_main.fsh"

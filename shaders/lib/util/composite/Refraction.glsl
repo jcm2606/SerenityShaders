@@ -16,7 +16,7 @@ vec2 getRefractionOffset() {
         strength *= 0.25;
 
   #ifdef REFRACTION_REALISTIC
-    return getNormal(getWorldPosition(position.viewPositionFront) + cameraPosition, frontSurface.material).xy * strength - ((frontSurface.normal.xy / frontSurface.normal.z) * ((isEyeInWater == 0) ? 0.039978 : 0.022512378));
+    return getNormal(getWorldPosition(position.viewPositionFront) + cameraPosition, frontSurface.material).xy * strength - (frontSurface.normal.xy * ((isEyeInWater == 0) ? 0.039978 : 0.022512378));
   #else
     return getNormal(getWorldPosition(position.viewPositionFront) + cameraPosition, frontSurface.material).xy * strength;
   #endif
@@ -32,5 +32,5 @@ vec3 drawRefraction(in vec2 offset) {
     )
   ) offset = vec2(0.0);
 
-  return toHDR(texture2D(colortex0, clamp01(texcoord + offset)).rgb, COLOUR_RANGE_COMPOSITE);
+  return toHDR(texture2D(colortex0, clamp01(offset + texcoord)).rgb, COLOUR_RANGE_COMPOSITE);
 }

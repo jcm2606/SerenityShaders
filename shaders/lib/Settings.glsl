@@ -25,6 +25,9 @@ const float centerDepthHalflife = 2.0;
 
 const int noiseTextureResolution = 256;
 
+const float wetnessHalflife = 400.0;
+const float drynessHalflife = 40.0;
+
 //#define LSD_MODE
 
 const vec3 waterColor = vec3(0.1, 0.5, 0.9);

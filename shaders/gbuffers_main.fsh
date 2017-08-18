@@ -33,6 +33,18 @@ varying vec3 worldpos;
     uniform sampler2D specular;
   #endif
 
+  #if SHADER == GBUFFERS_TERRAIN || SHADER == GBUFFERS_ENTITIES
+    uniform int isEyeInWater;
+
+    uniform mat4 gbufferProjection;
+    uniform mat4 gbufferProjectionInverse;
+    uniform mat4 gbufferModelViewInverse;
+
+    uniform vec3 cameraPosition;
+
+    uniform sampler2D depthtex1;
+  #endif
+
   uniform float wetness;
 
   #if SHADER == GBUFFERS_WATER
@@ -55,6 +67,11 @@ varying vec3 worldpos;
   #include "/lib/util/Normals.glsl"
 
   #include "/lib/util/gbuffer/ParallaxTransparent.glsl"
+#endif
+
+#if SHADER == GBUFFERS_TERRAIN || SHADER == GBUFFERS_ENTITIES
+  #include "/lib/util/Space.glsl"
+  #include "/lib/util/gbuffer/Puddles.glsl"
 #endif
 
 // MAIN

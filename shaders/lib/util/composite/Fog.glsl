@@ -194,7 +194,7 @@
     moisture *= weight;
 
     // TIME-BASED MOISTURE SCALING
-    moisture *= FOG_THICKNESS_NOON * timeVector.x + FOG_THICKNESS_NIGHT * timeVector.y + mix(FOG_THICKNESS_SUNSET, FOG_THICKNESS_SUNRISE, timeVector.w) * timeVector.z;
+    moisture += FOG_THICKNESS_NOON * timeVector.x + FOG_THICKNESS_NIGHT * timeVector.y + mix(FOG_THICKNESS_SUNSET, FOG_THICKNESS_SUNRISE, timeVector.w) * timeVector.z;
 
     // CYCLE-BASED MOISTURE SCALING
     #define smoothMoonPhase ( (float(worldTime) + float(moonPhase) * 24000.0) * 0.00000595238095238 )
@@ -202,6 +202,9 @@
     moisture += (sin(smoothMoonPhase * pi)) * 64.0;
 
     #undef smoothMoonPhase
+
+    // RAIN MOISTURE SCALING
+    moisture += rainStrength * 64.0;
 
     // LIGHTING CONTRIBUTION
     outColour = (

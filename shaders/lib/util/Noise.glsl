@@ -17,6 +17,27 @@ vec4 texnoise3D(in sampler2D tex, in vec3 pos) {
     );
 }
 
+float noise2D(in vec2 coord) {
+    mat3x2 value = mat3x2(floor(coord), fract(coord), vec2(0.0));
+    
+    value[1] = pow2(value[1]) * (3.0 - 2.0 * value[1]);
+
+    value[2].x = mix(random(value[0]), random(value[0] + vec2(1.0, 0.0)), value[1].y);
+    value[2].y = mix(random(value[0] + vec2(0.0, 1.0)), random(value[0] + 1.0), value[1].y);
+
+    return mix(value[2].x, value[2].y, value[1].y);
+}
+
+float noise3D(in vec3 coord) {
+    mat2x3 coords = mat2x3(floor(coord), fract(coord));
+
+    return mix(
+        noise2D(((coords[0].z) * 19.9 + coords[0].xy) + coords[1].xy),
+        noise2D(((coords[0].z + 1.0) * 19.9 + coords[1].xy) + coords[0].xy),
+        coords[1].z
+    );
+}
+
 float hash13(vec3 p3){
     p3  = fract(p3 * .1031);
     p3 += dot(p3, p3.yzx + 19.19);

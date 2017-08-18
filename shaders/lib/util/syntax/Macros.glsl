@@ -16,3 +16,5 @@
 #define selectMaterial() ((position.depthBack > position.depthFront) ? frontMaterial : backMaterial)
 
 #define getLandMask(x) (x < (1.0 - near / far / far))
+
+#define random(x) fract(sin(dot(x, vec2(12.9898, 4.1414))) * 43758.5453)

@@ -75,6 +75,7 @@ uniform float far;
 uniform float viewWidth;
 uniform float viewHeight;
 uniform float frameTimeCounter;
+uniform float rainStrength;
 
 uniform vec3 cameraPosition;
 
@@ -126,6 +127,8 @@ void main() {
   if(!getLandMask(position.depthBack)) frame = drawSky(normalize(position.viewPositionBack), 0);
 
   // CALCULATE LIGHT COLOURS
+  mat2x3 lightColours;
+
   #include "/lib/util/composite/LightColours.glsl"
 
   // SHADE BACK FRAME
@@ -134,21 +137,16 @@ void main() {
   // RENDER DEPTH FOG TO BACK FRAME
   if(frontMaterial.water > 0.5 || isEyeInWater == 1) frame = drawWaterFog(frame, lightColours[0]);
 
-  // TINT BACK FRAME THE COLOUR OF FRONT FRAME
-  //backFrame *= (any(greaterThan(frontFrame, vec3(0.0)))) ? frontFrame : vec3(1.0);
-
   // POPULATE FRAME WITH BACK FRAME
   fragment.tex0.rgb = frame;
 
   // SAMPLE FOG
-  vec3 fogColour = vec3(0.0);
+  vec3 fogColour    = vec3(0.0);
   fragment.tex5.a   = getFog(fogColour, lightColours[0], lightColours[1]);
   fragment.tex5.rgb = fogColour;
   
   // SEND FRONT SHADOW DOWN FOR SPECULAR HIGHLIGHT
   fragment.tex0.a = shadingStruct.shadowFront;
-
-  //fragment.tex0.rgb = vec3(max0(1.0 - sqrt(shadingStruct.subsurface * 64.0)));
 
   // CONVERT FRAME TO LDR
   fragment.tex0.rgb = toLDR(fragment.tex0.rgb, COLOUR_RANGE_COMPOSITE);

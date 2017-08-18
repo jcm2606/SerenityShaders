@@ -16,6 +16,10 @@
   #include "/lib/util/composite/Absorption.glsl"
 #endif
 
+#ifndef INCLUDED_DIFFUSE
+  #include "/lib/util/Diffuse.glsl"
+#endif
+
 struct Shading {
   float shadowFront;
   float shadowBack;
@@ -112,7 +116,7 @@ vec3 doShading(in vec3 diffuse, in vec3 direct, in vec3 ambient) {
   // CALCULATE SHADOWING
   getShadows();
 
-  #define directDiffuse max0(dot(fnormalize(backSurface.normal), lightVector))
+  #define directDiffuse orenNayer(normalize(position.viewPositionBack), lightVector, fnormalize(backSurface.normal), backSurface.roughness)//max0(dot(fnormalize(backSurface.normal), lightVector))
   #define ambientDiffuse max0(dot(fnormalize(backSurface.normal), upVector) * 0.45 + 0.55)
 
   #define subsurfaceDiffuse ( (backMaterial.subsurface > 0.5) ? max0(1.0 - pow(shadingStruct.dist * 64.0, 0.25)) * 1.5 : 1.0 )
