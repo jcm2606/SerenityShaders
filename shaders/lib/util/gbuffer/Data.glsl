@@ -42,16 +42,20 @@ buffer0.b = material;
 // NORMAL
 vec3 surfaceNormal = normal;
 
-#if   SHADER == GBUFFERS_TERRAIN || SHADER == GBUFFERS_HAND
-  float normalMaxAngle = mix(0.5, 0.0, puddle);
-  //normalMaxAngle = normalMaxAngle * (1.0 - wetness * lmcoord.y * 0.65);
-
+#if   SHADER == GBUFFERS_TERRAIN
+  float normalMaxAngle = mix(NORMAL_MAP_ANGLE_SOLID, NORMAL_MAP_ANGLE_WET, puddle);
+  surfaceNormal  = normalMap.rgb * 2.0 - 1.0;
+  surfaceNormal  = surfaceNormal * vec3(normalMaxAngle) + vec3(0.0, 0.0, 1.0 - normalMaxAngle);
+  surfaceNormal *= tbn;
+  surfaceNormal  = fnormalize(surfaceNormal);
+#elif SHADER == GBUFFERS_HAND
+  const float normalMaxAngle = NORMAL_MAP_ANGLE_SOLID;
   surfaceNormal  = normalMap.rgb * 2.0 - 1.0;
   surfaceNormal  = surfaceNormal * vec3(normalMaxAngle) + vec3(0.0, 0.0, 1.0 - normalMaxAngle);
   surfaceNormal *= tbn;
   surfaceNormal  = fnormalize(surfaceNormal);
 #elif SHADER == GBUFFERS_WATER
-  const float normalMaxAngle = 0.03;
+  const float normalMaxAngle = NORMAL_MAP_ANGLE_TRANSPARENT;
 
   surfaceNormal  = getNormal(getTransparentParallax(worldpos, view, material), material);
   surfaceNormal  = surfaceNormal * vec3(normalMaxAngle) + vec3(0.0, 0.0, 1.0 - normalMaxAngle);
@@ -99,9 +103,9 @@ float emissive = 0.0;
 
 #if SHADER == GBUFFERS_TERRAIN || SHADER == GBUFFERS_ENTITIES
 #if 1
-  roughness = mix(roughness, PBR_WATER.x, puddle);
-  f0 = (f0 >= 0.5) ? f0 : mix(f0, PBR_WATER.y, puddle);
-  emissive = mix(emissive, PBR_WATER.z, puddle);
+  roughness = mix(roughness, PBR_WATER.x, clamp01(puddle));
+  f0 = (f0 >= 0.5) ? f0 : mix(f0, PBR_WATER.y, clamp01(puddle));
+  emissive = mix(emissive, PBR_WATER.z, clamp01(puddle));
 #endif
 #endif
 
