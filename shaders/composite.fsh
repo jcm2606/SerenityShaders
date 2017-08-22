@@ -61,9 +61,9 @@ uniform vec3 cameraPosition;
 #include "/lib/util/struct/StructFragment.glsl"
 #include "/lib/util/struct/StructPosition.glsl"
 
-Fragment fragment;
+Fragment fragment = FRAGMENT;
 
-Position position;
+Position position = POSITION;
 
 // ARBITRARY
 // FUNCTIONS

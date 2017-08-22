@@ -8,6 +8,8 @@
 
 #define INCLUDED_SURFACE
 
+#define SURFACE Surface(vec3(0.0), 0.0, 0.0, 0.0, vec4(0.0), 0.0, 0.0, 0.0, vec3(0.0))
+
 struct Surface {
   vec3 albedo;
 

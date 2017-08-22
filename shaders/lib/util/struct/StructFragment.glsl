@@ -8,6 +8,8 @@
 
 #define INCLUDED_FRAGMENT
 
+#define FRAGMENT Fragment(vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0))
+
 struct Fragment {
   vec4 tex0;
   vec4 tex1;

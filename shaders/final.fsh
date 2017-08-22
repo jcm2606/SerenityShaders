@@ -40,7 +40,7 @@ uniform int isEyeInWater;
 // STRUCT
 #include "/lib/util/struct/StructFragment.glsl"
 
-Fragment fragment;
+Fragment fragment = FRAGMENT;
 
 // ARBITRARY
 // FUNCTIONS

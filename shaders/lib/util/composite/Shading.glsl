@@ -20,6 +20,8 @@
   #include "/lib/util/Diffuse.glsl"
 #endif
 
+#define SHADING Shading(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, vec3(0.0))
+
 struct Shading {
   float shadowFront;
   float shadowBack;
@@ -32,7 +34,7 @@ struct Shading {
   float material;
 
   vec3 shadowColour;
-} shadingStruct;
+} shadingStruct = SHADING;
 
 void getShadows() {
   // CALCULATE SHADOW POSITIONS

@@ -10,6 +10,8 @@
   #include "/lib/util/Materials.glsl"
 #endif
 
+#define MATERIAL Material(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+
 struct Material {
   float hand;
   float entity;

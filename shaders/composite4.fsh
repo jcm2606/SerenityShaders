@@ -54,13 +54,13 @@ uniform int isEyeInWater;
 #include "/lib/util/struct/StructSurface.glsl"
 #include "/lib/util/struct/StructMaterial.glsl"
 
-Fragment fragment;
+Fragment fragment = FRAGMENT;
 
-Position position;
+Position position = POSITION;
 
-Surface backSurface;
+Surface backSurface = SURFACE;
 
-Material backMaterial;
+Material backMaterial = MATERIAL;
 
 // ARBITRARY
 // FUNCTIONS

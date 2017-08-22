@@ -8,6 +8,8 @@
 
 #define INCLUDED_POSITION
 
+#define POSITION Position(0.0, 0.0, vec3(0.0), vec3(0.0))
+
 struct Position {
   float depthBack;
   float depthFront;
