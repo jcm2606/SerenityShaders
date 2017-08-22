@@ -74,6 +74,10 @@ Position position = POSITION;
   #include "/lib/util/composite/VolumeClouds.glsl"
 #endif
 
+#ifndef INCLUDED_SPACE
+  #include "/lib/util/Space.glsl"
+#endif
+
 // MAIN
 void main() {
   // POPULATE STRUCTS
