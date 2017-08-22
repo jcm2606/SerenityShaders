@@ -44,7 +44,9 @@ Fragment fragment;
 // ARBITRARY
 // FUNCTIONS
 
-#include "/lib/util/composite/Bloom.glsl"
+#ifdef BLOOM
+  #include "/lib/util/composite/Bloom.glsl"
+#endif
 
 // MAIN
 void main() {
@@ -54,8 +56,10 @@ void main() {
   // CONVERT FRAME TO HDR
   fragment.tex0.rgb = toHDR(fragment.tex0.rgb, COLOUR_RANGE_COMPOSITE);
 
-  // DRAW FIRST BLOOM PASS
-  fragment.tex5.rgb = bloomPrepass(texcoord);
+  #ifdef BLOOM
+    // DRAW FIRST BLOOM PASS
+    fragment.tex5.rgb = bloomPrepass(texcoord);
+  #endif
 
   // CONVERT FRAME TO LDR
   fragment.tex0.rgb = toLDR(fragment.tex0.rgb, COLOUR_RANGE_COMPOSITE);

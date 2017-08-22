@@ -12,14 +12,12 @@
   #include "/lib/util/Noise.glsl"
 #endif
 
-#define rot2(a) mat2(cos(a), -sin(a), sin(a), cos(a))
-
 // WATER
 float water0(in vec2 position) {
   float height = 0.0;
 
   position *= 0.35;
-  position *= rot2(0.7);
+  position *= rot2(windDirection);
 
   vec2 move = swizzle2 * frametime * 0.35;
   const vec2 stretch = vec2(1.0, 0.75);
@@ -28,7 +26,7 @@ float water0(in vec2 position) {
   height += simplex2D(position * vec2(1.0, 0.65) * 1.5 + move * 2.0) * 0.5;
   height += simplex2D(position * vec2(1.0, 0.75) * 2.0 + move * 4.0) * 0.25;
 
-  position *= rot2(0.7);
+  position *= rot2(windDirection);
   height += simplex2D(position * 4.0 + move * 4.0) * 0.125;
 
   height *= mix(0.4, 0.6, rainStrength);
@@ -125,5 +123,3 @@ vec3 getNormal(in vec3 position, in float material) {
   #undef height3
   #undef height4
 }
-
-#undef rot

@@ -112,7 +112,9 @@ Material backMaterial;
 
 #include "/lib/util/composite/DepthFog.glsl"
 
-#include "/lib/util/composite/Fog.glsl"
+#ifdef VOLUMETRIC_FOG
+  #include "/lib/util/composite/Fog.glsl"
+#endif
 
 // MAIN
 void main() {
@@ -124,10 +126,10 @@ void main() {
   createMaterial(frontMaterial, frontSurface);
   createMaterial(backMaterial, backSurface);
 
-  // CREATE FRONT AND BACK FRAMES
+  // CREATE FRAME FROM BACK ALBEDO
   vec3 frame = backSurface.albedo;
 
-  // RENDER SKY TO BACK FRAME
+  // RENDER SKY
   if(!getLandMask(position.depthBack)) frame = drawSky(normalize(position.viewPositionBack), texcoord, 0);
 
   // CALCULATE LIGHT COLOURS
@@ -135,17 +137,19 @@ void main() {
 
   #include "/lib/util/composite/LightColours.glsl"
 
-  // SHADE BACK FRAME
+  // SHADE
   if(getLandMask(position.depthBack)) frame = doShading(frame, lightColours[0], lightColours[1]);
 
-  // RENDER DEPTH FOG TO BACK FRAME
+  // RENDER DEPTH FOG
   if(frontMaterial.water > 0.5 || isEyeInWater == 1) frame = drawWaterFog(frame, lightColours[0]);
 
-  // POPULATE FRAME WITH BACK FRAME
+  // POPULATE TEX0
   fragment.tex0.rgb = frame;
 
-  // SAMPLE FOG
-  getFog(fragment.tex5, lightColours[0], lightColours[1]);
+  #ifdef VOLUMETRIC_FOG
+    // SAMPLE FOG
+    getFog(fragment.tex5, lightColours[0], lightColours[1]);
+  #endif
   
   // SEND FRONT SHADOW DOWN FOR SPECULAR HIGHLIGHT
   fragment.tex0.a = shadingStruct.shadowFront;

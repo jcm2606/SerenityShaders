@@ -1,3 +1,11 @@
+/*
+  SERENITY SHADER PACK.
+  JCM2606 / JAKEMICHIE97.
+  SHADERLABS.
+
+  Please read "License.txt" at the root of the shader pack before making any edits.
+*/
+
 #define INCLUDED_SKY
 
 #ifndef INCLUDED_ATMOSPHERE
@@ -17,8 +25,10 @@
 vec3 drawSky(in vec3 view, in vec2 texcoord, in int mode) {
   vec3 sky = js_getScatter(drawStars(view), view, mode);
 
-  #if STAGE == COMPOSITE1
-    sky = drawVolumeClouds(sky, texcoord);
+  #ifdef VOLUME_CLOUDS
+    #if STAGE == COMPOSITE1
+      sky = drawVolumeClouds(sky, texcoord);
+    #endif
   #endif
 
   return sky;

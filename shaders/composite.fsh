@@ -20,9 +20,7 @@
 #include "/lib/util/PostHeader.glsl"
 
 // CONST
-
 // USED BUFFERS
-
 // VARYING
 varying vec2 texcoord;
 
@@ -70,9 +68,11 @@ Position position;
 // ARBITRARY
 // FUNCTIONS
 
-#include "/lib/util/composite/VolumeClouds.glsl"
+#ifdef VOLUME_CLOUDS
+  #include "/lib/util/composite/Atmosphere.glsl"
 
-#include "/lib/util/composite/Atmosphere.glsl"
+  #include "/lib/util/composite/VolumeClouds.glsl"
+#endif
 
 // MAIN
 void main() {
@@ -81,13 +81,15 @@ void main() {
   createDepths(position, texcoord);
   createViewPositions(position, texcoord, false, true);
 
-  // GENERATE LIGHTING COLOURS
-  mat2x3 lightColours = mat2x3(0.0);
+  #ifdef VOLUME_CLOUDS
+    // GENERATE LIGHTING COLOURS
+    mat2x3 lightColours = mat2x3(0.0);
 
-  #include "/lib/util/composite/LightColours.glsl"
+    #include "/lib/util/composite/LightColours.glsl"
 
-  // GENERATE VOLUMETRIC CLOUDS
-  fragment.tex6 = getVolumeClouds(position.viewPositionBack, texcoord, lightColours[0], lightColours[1]);
+    // GENERATE VOLUMETRIC CLOUDS
+    fragment.tex6 = getVolumeClouds(position.viewPositionBack, texcoord, lightColours[0], lightColours[1]);
+  #endif
   
   // POPULATE OUTGOING BUFFERS
 /* DRAWBUFFERS:56 */

@@ -1,3 +1,11 @@
+/*
+  SERENITY SHADER PACK.
+  JCM2606 / JAKEMICHIE97.
+  SHADERLABS.
+
+  Please read "License.txt" at the root of the shader pack before making any edits.
+*/
+
 vec3 drawLSDMode(in vec2 texcoord) {
   vec3 colour = vec3(0.0);
  

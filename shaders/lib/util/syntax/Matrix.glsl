@@ -1,3 +1,11 @@
+/*
+  SERENITY SHADER PACK.
+  JCM2606 / JAKEMICHIE97.
+  SHADERLABS.
+
+  Please read "License.txt" at the root of the shader pack before making any edits.
+*/
+
 #define transMAD(mat, v) (mat3(mat) * (v) + (mat)[3].xyz)
 
 #define diagonal2(mat) vec2((mat)[0].x, (mat)[1].y)

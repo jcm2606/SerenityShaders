@@ -1,3 +1,11 @@
+/*
+  SERENITY SHADER PACK.
+  JCM2606 / JAKEMICHIE97.
+  SHADERLABS.
+
+  Please read "License.txt" at the root of the shader pack before making any edits.
+*/
+
 vec2 noonNight   = vec2(0.0);
      noonNight.x = (0.25 - clamp(sunAngle, 0.0, 0.5));
      noonNight.y = (0.75 - clamp(sunAngle, 0.5, 1.0));

@@ -1,3 +1,11 @@
+/*
+  SERENITY SHADER PACK.
+  JCM2606 / JAKEMICHIE97.
+  SHADERLABS.
+
+  Please read "License.txt" at the root of the shader pack before making any edits.
+*/
+
 #define INCLUDED_DIFFUSE
 
 float orenNayer(vec3 v, vec3 l, vec3 n, float r) {

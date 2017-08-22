@@ -1,3 +1,11 @@
+/*
+  SERENITY SHADER PACK.
+  JCM2606 / JAKEMICHIE97.
+  SHADERLABS.
+
+  Please read "License.txt" at the root of the shader pack before making any edits.
+*/
+
 #if STAGE == COMPOSITE5
   vec3 bloomPass(const in vec2 texcoord, const in float lod, const in vec2 offset) {
     vec3 bloom       = vec3(0.0);

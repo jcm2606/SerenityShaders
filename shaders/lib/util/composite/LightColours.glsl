@@ -1,3 +1,11 @@
+/*
+  SERENITY SHADER PACK.
+  JCM2606 / JAKEMICHIE97.
+  SHADERLABS.
+
+  Please read "License.txt" at the root of the shader pack before making any edits.
+*/
+
 // DIRECT LIGHT
 lightColours[0]  = js_getScatter(vec3(0.0), lightVector, 0);
 lightColours[0] *= DIRECT_BRIGHTNESS_NOON * timeVector.x + DIRECT_BRIGHTNESS_NIGHT * timeVector.y + DIRECT_BRIGHTNESS_HORIZON * timeVector.z;

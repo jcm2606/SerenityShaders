@@ -1,3 +1,11 @@
+/*
+  SERENITY SHADER PACK.
+  JCM2606 / JAKEMICHIE97.
+  SHADERLABS.
+
+  Please read "License.txt" at the root of the shader pack before making any edits.
+*/
+
 #define PBR_DEFAULT vec3(0.999, 0.02, 0.0)
 
 #define PBR_METAL_IRON vec3(0.2, 0.8, 0.0)

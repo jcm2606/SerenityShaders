@@ -1,4 +1,14 @@
+/*
+  SERENITY SHADER PACK.
+  JCM2606 / JAKEMICHIE97.
+  SHADERLABS.
+
+  Please read "License.txt" at the root of the shader pack before making any edits.
+*/
+
 // TRANSPARENT
+#define PARALLAX_TRANSPARENT
+
 #define PARALLAX_TRANSPARENT_STEPS 4
 
 #define PARALLAX_TRANSPARENT_HEIGHT_WATER         1.1

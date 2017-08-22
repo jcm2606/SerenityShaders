@@ -12,6 +12,8 @@ const vec3 swizzle3 = vec3(1.0, 0.0, 0.5);
 #define reverse2(v) v.yx
 #define reverse3(v) v.zyx
 
+#define rot2(a) mat2(cos(a), -sin(a), sin(a), cos(a))
+
 void swap2(inout vec2 a, inout vec2 b) {
   vec2 temp = a;
   a = b;

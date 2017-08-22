@@ -1,3 +1,11 @@
+/*
+  SERENITY SHADER PACK.
+  JCM2606 / JAKEMICHIE97.
+  SHADERLABS.
+
+  Please read "License.txt" at the root of the shader pack before making any edits.
+*/
+
 float pow2(in float n)  { return n * n; }
 float pow3(in float n)  { return pow2(n) * n; }
 float pow4(in float n)  { return pow2(pow2(n)); }

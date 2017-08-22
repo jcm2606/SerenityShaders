@@ -47,7 +47,9 @@ Fragment fragment;
 
 #include "/lib/util/composite/Tonemap.glsl"
 
-#include "/lib/util/composite/Bloom.glsl"
+#ifdef BLOOM
+  #include "/lib/util/composite/Bloom.glsl"
+#endif
 
 // MAIN
 void main() {
@@ -57,8 +59,10 @@ void main() {
   // CONVERT FRAME TO HDR
   fragment.tex0.rgb = toHDR(fragment.tex0.rgb, COLOUR_RANGE_COMPOSITE);
 
-  // DRAW SECOND BLOOM PASS
-  fragment.tex0.rgb = bloomFinal(fragment.tex0.rgb, texcoord);
+  #ifdef BLOOM
+    // DRAW SECOND BLOOM PASS
+    fragment.tex0.rgb = bloomFinal(fragment.tex0.rgb, texcoord);
+  #endif
 
   // PERFORM TONEMAPPING
   fragment.tex0.rgb = tonemap(fragment.tex0.rgb);

@@ -6,6 +6,7 @@
   Please read "License.txt" at the root of the shader pack before making any edits.
 */
 
+// INCLUDES
 #include "/lib/option/Post.glsl"
 #include "/lib/option/Normals.glsl"
 #include "/lib/option/Shading.glsl"
@@ -16,22 +17,25 @@
 #include "/lib/option/Refraction.glsl"
 #include "/lib/option/VolumeClouds.glsl"
 
-#ifndef MC_SEA_LEVEL
-  #define MC_SEA_LEVEL 64.0
-#endif
-
-const float sunPathRotation = -30.0;
-
-const float centerDepthHalflife = 2.0;
+// OPTIFINE OPTIONS
 
 const int noiseTextureResolution = 256;
 
 const float wetnessHalflife = 400.0;
 const float drynessHalflife = 20.0;
+const float sunPathRotation = -30.0;
+const float centerDepthHalflife = 2.0;
+
+// SHADER OPTIONS
+#ifndef MC_SEA_LEVEL
+  #define MC_SEA_LEVEL 64.0
+#endif
 
 //#define LSD_MODE
 
 const vec3 waterColor = vec3(0.1, 0.5, 0.9);
+
+const float windDirection = 0.7;
 
 #define GLOBAL_SPEED 1.0 // [0.0625 0.125 0.25 0.5 1.0 2.0 4.0 8.0 16.0]
 

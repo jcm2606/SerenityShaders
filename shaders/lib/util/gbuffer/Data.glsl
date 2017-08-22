@@ -1,3 +1,11 @@
+/*
+  SERENITY SHADER PACK.
+  JCM2606 / JAKEMICHIE97.
+  SHADERLABS.
+
+  Please read "License.txt" at the root of the shader pack before making any edits.
+*/
+
 // NORMAL MAP
 #if   SHADER == GBUFFERS_TERRAIN || SHADER == GBUFFERS_HAND
   vec4 normalMap = texture2D(normals, uvcoord);
@@ -57,7 +65,13 @@ vec3 surfaceNormal = normal;
 #elif SHADER == GBUFFERS_WATER
   const float normalMaxAngle = NORMAL_MAP_ANGLE_TRANSPARENT;
 
-  surfaceNormal  = getNormal(getTransparentParallax(worldpos, view, material), material);
+  vec3 normalCoord = worldpos;
+
+  #ifdef PARALLAX_TRANSPARENT
+    normalCoord = getTransparentParallax(worldpos, view, material);
+  #endif
+
+  surfaceNormal  = getNormal(normalCoord, material);
   surfaceNormal  = surfaceNormal * vec3(normalMaxAngle) + vec3(0.0, 0.0, 1.0 - normalMaxAngle);
   surfaceNormal *= tbn;
   surfaceNormal  = fnormalize(surfaceNormal);

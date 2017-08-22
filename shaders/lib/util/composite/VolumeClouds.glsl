@@ -1,3 +1,11 @@
+/*
+  SERENITY SHADER PACK.
+  JCM2606 / JAKEMICHIE97.
+  SHADERLABS.
+
+  Please read "License.txt" at the root of the shader pack before making any edits.
+*/
+
 #if   STAGE == COMPOSITE || STAGE == COMPOSITE3
   #ifndef INCLUDED_NOISE
     #include "/lib/util/Noise.glsl"
@@ -31,6 +39,8 @@
     rayPos *= 0.01;
     rayPos *= vec3(0.5, 1.0, 0.7);
 
+    rayPos.xz *= rot2(windDirection);
+
     cloud += pow2(cloudNoiseOctave(rayPos * vec3(1.0, 0.1, 1.0) + (cloudMovement * 0.5)));
     //cloud += pow2(cloudNoiseOctave(rayPos * 2.0 + (cloudMovement * 2.0))) * 0.5;
     cloud += pow2(cloudNoiseOctave(rayPos * 4.0 + (cloudMovement * 4.0))) * 0.25;
@@ -44,7 +54,7 @@
 
   vec4 getVolumeClouds(in vec3 view, in vec2 texcoord, in vec3 direct, in vec3 ambient) {
     ambient *= 0.15;
-    direct *= 2.0;
+    direct *= 4.0;
 
     vec4 cloud = vec4(0.0);
 
@@ -55,7 +65,7 @@
     const float cloudDepthHalf = 1.0 / (cloudDepth * 0.5);
 
     float samples = VOLUME_CLOUDS_SAMPLES;
-    float coverage = mix(mix(0.48, 0.63, clamp01(sin(smoothMoonPhase * pi))), 0.67, wetness) * 1.4;
+    float coverage = mix(mix(0.42, 0.53, clamp01(sin(smoothMoonPhase * pi))), 0.61, wetness) * 1.4;
     const float density = 10.0;
 
     mat4x3 ray;

@@ -73,10 +73,12 @@ vec3 drawReflection(in vec3 diffuse, in vec3 direct, in vec3 ambient) {
   // SAMPLE SKY IN REFLECTED DIRECTION
   vec3 sky = drawSky(rview, texcoord, 1) * 2.0;
   
-  #ifdef VOLUME_CLOUDS_REFLECTION
-    vec4 volumeClouds = getVolumeClouds(reflect(position.viewPositionFront, selectSurface().normal), texcoord, direct, ambient);
+  #ifdef VOLUME_CLOUDS
+    #ifdef VOLUME_CLOUDS_REFLECTION
+      vec4 volumeClouds = getVolumeClouds(reflect(position.viewPositionFront, selectSurface().normal), texcoord, direct, ambient);
 
-    sky = mix(sky, volumeClouds.rgb, clamp01(volumeClouds.a));
+      sky = mix(sky, volumeClouds.rgb, clamp01(volumeClouds.a));
+    #endif
   #endif
 
   // MIX BETWEEN RAYTRACED AND SKY SAMPLES
