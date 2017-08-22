@@ -46,16 +46,26 @@ uniform sampler2D colortex4;
 uniform sampler2D depthtex0;
 uniform sampler2D depthtex1;
 
+uniform sampler2D noisetex;
+
 uniform mat4 gbufferProjection;
 uniform mat4 gbufferProjectionInverse;
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
 
 uniform int isEyeInWater;
+uniform int worldTime;
+uniform int moonPhase;
 
 uniform float near;
 uniform float far;
 uniform float rainStrength;
+uniform float wetness;
+uniform float frameTimeCounter;
+uniform float viewWidth;
+uniform float viewHeight;
+
+uniform vec3 cameraPosition;
 
 // STRUCT
 #include "/lib/util/Encoding.glsl"
@@ -99,7 +109,7 @@ void main() {
   }
 
   // DRAW REFLECTIONS
-  if(getLandMask(position.depthFront) && isEyeInWater == 0) fragment.tex0.rgb = drawReflection(fragment.tex0.rgb, lightColours[0]);
+  if(getLandMask(position.depthFront) && isEyeInWater == 0) fragment.tex0.rgb = drawReflection(fragment.tex0.rgb, lightColours[0], lightColours[1]);
 
   // CONVERT FRAME TO LDR
   fragment.tex0.rgb = toLDR(fragment.tex0.rgb, COLOUR_RANGE_COMPOSITE);

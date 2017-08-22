@@ -33,6 +33,7 @@ flat varying float material;
 uniform sampler2D texture;
 
 uniform float frameTimeCounter;
+uniform float rainStrength;
 
 // STRUCT
 // ARBITRARY

@@ -14,6 +14,7 @@
 #include "/lib/option/DOF.glsl"
 #include "/lib/option/Fog.glsl"
 #include "/lib/option/Refraction.glsl"
+#include "/lib/option/VolumeClouds.glsl"
 
 #ifndef MC_SEA_LEVEL
   #define MC_SEA_LEVEL 64.0
@@ -26,7 +27,7 @@ const float centerDepthHalflife = 2.0;
 const int noiseTextureResolution = 256;
 
 const float wetnessHalflife = 400.0;
-const float drynessHalflife = 40.0;
+const float drynessHalflife = 20.0;
 
 //#define LSD_MODE
 

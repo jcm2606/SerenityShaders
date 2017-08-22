@@ -11,100 +11,125 @@
     #include "/lib/util/Noise.glsl"
   #endif
 
-  // MOISTURE FUNCTIONS
-  float getMoisture(in float dist, in vec3 world, in float material, in float shadowBack, in float shadowFront) {
-    float moisture = 0.0;
-
-    // HEIGHT
-    moisture += clamp01(exp2(-max0(world.y - MC_SEA_LEVEL) * 0.05));
-
-    // GROUND
-    #ifdef FOG_GROUND_HQ
-      #define scale 0.3E-1
-      #define stretch vec3(1.0, 2.0, 1.0)
-
-      vec3 move = vec3(1.0, 0.0, 0.0) * frametime * 0.1;
-
-      #define rot(a) mat2(cos(a), -sin(a), sin(a), cos(a))
-      world.xz *= rot(0.7);
-      #undef rot
-
-      float noise  = max0(simplex3D(world * stretch * scale + move)) * 0.75 + 0.25;
-
-      #undef scale
-      #undef stretch
-    #endif
-
-    moisture += clamp01(exp2(-abs(world.y - MC_SEA_LEVEL) * FOG_GROUND_HEIGHT)) * 16.0
-      #ifdef FOG_GROUND_HQ
-        * noise
-      #endif
-    ;
-
-    // WATER
-    moisture += (
-      isEyeInWater == 1 &&
-      dist < linearDepth(position.depthFront, near, far)
-    ) ? 32.0 : 0.0;
-
-    return moisture;
-  }
-
-  /*
-  float getHeightFog(in vec3 world) {
-    float fog = 0.0;
-
-    fog += mix(
-      0.0,
-      FOG_HEIGHT_THICKNESS_HIGH,
-      clamp01(exp2(-max0(world.y - MC_SEA_LEVEL) * 0.05))
-    );
-
-    fog += mix(
-      0.0,
-      FOG_HEIGHT_THICKNESS_MID,
-      clamp01(exp2(-max0(world.y - MC_SEA_LEVEL) * 0.1))
-    );
-
-    fog += mix(
-      0.0,
-      FOG_HEIGHT_THICKNESS_LOW,
-      clamp01(exp2(-max0(world.y - MC_SEA_LEVEL) * 0.2))
-    );
-
-    return max(FOG_HEIGHT_MIN, fog * FOG_HEIGHT_MULTIPLIER);
-  }
-
-  float getGroundFog(in vec3 world) {
-    #define scale 1.0E-1
-    #define stretch vec3(1.0, 2.0, 1.0)
-
-    vec3 move = vec3(1.0, 0.0, 0.0) * frametime * 0.1;
-
-    #define rot(a) mat2(cos(a), -sin(a), sin(a), cos(a))
-    world.xz *= rot(0.7);
-    #undef rot
-
-    float noise  = max0(simplex3D(world * stretch * scale + move));
-          noise += max0(simplex3D(world * stretch * scale * 2.0 + move * 4.0));
-
-    #undef scale
-    #undef stretch
-
-    return mix(0.0, FOG_GROUND_THICKNESS, clamp01(
-      exp2(-abs(world.y - MC_SEA_LEVEL) * FOG_GROUND_HEIGHT) * noise
-    ));
-  }
-
-  float getWaterFog(in float minDist) {
-    return ((isEyeInWater == 1 && linearDepth(position.depthFront, near, far) > minDist)) ? 0.1 : 0.1;
-  }
-  */
   // SAMPLE
   float distx(in float dist){
     return (far * (dist - near)) / (dist * (far - near));
   }
 
+  // FOG
+  float getMoisture(in vec3 world, in vec3 view) {
+    float moisture = 0.0;
+
+    // HEIGHT FOG
+    moisture += mix(0.01, 0.5, clamp01(exp2(-max0(world.y - MC_SEA_LEVEL) * 0.01)));
+
+    // GROUND FOG
+    moisture += mix(0.0, 4.0, clamp01(exp2(-max0(world.y - MC_SEA_LEVEL) * 0.4)));
+
+    return moisture * 0.0009;
+  }
+
+  // MARCHER
+  void getFog(inout vec4 fogOut, in vec3 direct, in vec3 ambient) {
+    fogOut = vec4(0.0);
+
+    const int steps = FOG_QUALITY;
+    const float inverseSteps = 1.0 / float(steps);
+    const float finalMultiplier = inverseSteps * 15.0;
+    
+    mat4 worldToShadow = shadowProjection * shadowModelView;
+    mat4 shadowToWorld = shadowModelViewInverse * shadowProjectionInverse;
+
+    mat2x3 fog = mat2x3(0.0);
+
+    #define lightColour fog[0]
+    #define occlusion fog[1].x
+    #define moisture fog[1].y
+
+    mat4x3 ray = mat4x3(0.0);
+
+    #define rayStart ray[0]
+    #define rayEnd ray[1]
+    #define rayPos ray[2]
+    #define rayStep ray[3]
+
+    rayStart = transMAD(worldToShadow, getWorldPosition(vec3(0.0, 0.0, 0.0)));
+    rayEnd = transMAD(worldToShadow, getWorldPosition(position.viewPositionBack));
+
+    rayStep = fnormalize(rayEnd - rayStart) * distance(rayEnd, rayStart) * inverseSteps;
+
+    rayPos = rayStep * bayer64(ivec2(int(texcoord.x * viewWidth), int(texcoord.y * viewHeight))) + rayStart;
+
+    mat3x3 positions = mat3x3(0.0);
+    mat3x4 shadowBuffer = mat3x4(0.0);
+
+    #define shadow positions[0]
+    #define world positions[1]
+    #define view positions[2]
+
+    #define shadowColour shadowBuffer[0].rgb
+    #define depthFront shadowBuffer[1].x
+    #define shadowFront shadowBuffer[1].y
+    #define shadowBack shadowBuffer[1].z
+    #define material shadowBuffer[1].w
+
+    float weight = pow(flength(rayStep), 0.4);
+
+    for (int i = 0; i < steps; i++, rayPos += rayStep) {
+      shadow = vec3(distortShadowPosition(rayPos.xy, 0), rayPos.z) * 0.5 + 0.5;
+      world = transMAD(shadowToWorld, rayPos);
+      view = transMAD(gbufferModelView, world);
+      world += cameraPosition;
+
+      depthFront = texture2D(shadowtex0, shadow.xy).x;
+      shadowFront = compareShadow(depthFront, shadow.z);
+      shadowBack = (!getLandMask(position.depthBack)) ? 1.0 : compareShadow(texture2D(shadowtex1, shadow.xy).x, shadow.z);
+      material = texture2D(shadowcolor1, shadow.xy).a;
+      shadowColour = vec3(1.0);
+
+      lightColour += shadowColour * weight;// * ((isWithinThreshold(material, MATERIAL_WATER, 0.01) > 0.5) ? absorbWater(abs(shadowDepth - shadow.z) * 256.0) : 1.0); 
+      moisture += getMoisture(world, view) * weight;
+      occlusion += shadowBack * weight;
+    }
+
+    #undef shadow
+    #undef world
+    #undef view
+
+    #undef shadowColour
+    #undef depthFront
+    #undef shadowFront
+    #undef shadowBack
+    #undef material
+
+    // CYCLE FOG
+    moisture += max0(sin(smoothMoonPhase * pi)) * 0.009;
+
+    // RAIN FOG
+    moisture += wetness * 0.007;
+
+    fogOut.a = occlusion * moisture;
+
+    fogOut.rgb = lightColour * (
+      direct * FOG_LIGHTING_DIRECT_CONTRIBUTION * max(0.05, pow5(dot(normalize(position.viewPositionBack), lightVector))) +
+      ambient * FOG_LIGHTING_AMBIENT_CONTRIBUTION
+    );
+
+    fogOut *= finalMultiplier;
+
+    fogOut.rgb = toLDR(fogOut.rgb, COLOUR_RANGE_FOG);
+    fogOut.a = pow(fogOut.a, inverseGammaCurve);
+
+    #undef occlusion
+    #undef moisture
+
+    #undef rayStart
+    #undef rayEnd
+    #undef rayPos
+    #undef rayStep
+  }
+
+  /*
   float getFog(inout vec3 outColour, in vec3 direct, in vec3 ambient) {
     vec2 ray = vec2(0.0);
 
@@ -197,29 +222,25 @@
     moisture += FOG_THICKNESS_NOON * timeVector.x + FOG_THICKNESS_NIGHT * timeVector.y + mix(FOG_THICKNESS_SUNSET, FOG_THICKNESS_SUNRISE, timeVector.w) * timeVector.z;
 
     // CYCLE-BASED MOISTURE SCALING
-    #define smoothMoonPhase ( (float(worldTime) + float(moonPhase) * 24000.0) * 0.00000595238095238 )
-
-    moisture += (sin(smoothMoonPhase * pi)) * 64.0;
-
-    #undef smoothMoonPhase
+    moisture += max0(sin(smoothMoonPhase * pi)) * 96.0;
 
     // RAIN MOISTURE SCALING
-    moisture += rainStrength * 64.0;
+    moisture += wetness * 64.0;
 
     // LIGHTING CONTRIBUTION
     outColour = (
       direct * FOG_DIRECT_CONTRIBUTION * ( pow(max0(dot(normalize(position.viewPositionBack), lightVector)), FOG_DIRECT_ANISOTROPY) * 2.0 + 1.0 ) / max(1.0, moisture * 0.05) +
       ambient * FOG_AMBIENT_CONTRIBUTION
-    ) * moisture * 0.3E-4;
+    );
 
     // COLOURED SHADOW APPLICATION
     outColour *= (any(greaterThan(colour, vec3(0.0)))) ? colour : vec3(1.0);
 
     // CONVERT OUTPUTS TO LDR
     outColour   = toLDR(outColour, COLOUR_RANGE_FOG);
-    rayStrength = pow(rayStrength / COLOUR_RANGE_FOG, inverseGammaCurve);
+    //rayStrength = pow(rayStrength / COLOUR_RANGE_FOG, inverseGammaCurve);
 
-    return rayStrength;
+    return rayStrength * moisture * 0.3E-4;
 
     #undef shadowFront
     #undef shadowBack
@@ -230,6 +251,7 @@
     #undef rayStep
     #undef rayDither
   }
+  */
 #elif STAGE == COMPOSITE2
   vec3 drawFog(in vec3 colour, in vec2 texcoord, in vec2 refractOffset) {
     // SAMPLE THE FOG WITH A 3x3 DEPTH AWARE BOX BLUR
@@ -254,6 +276,7 @@
 
     fog /= blurIterations;
 
-    return toHDR(fog.rgb, COLOUR_RANGE_FOG) * (pow(fog.a, gammaCurve)) * COLOUR_RANGE_FOG + colour;
+    //return toHDR(fog.rgb, COLOUR_RANGE_FOG) * clamp01(pow(fog.a, gammaCurve)) + colour;
+    return mix(colour, toHDR(fog.rgb, COLOUR_RANGE_FOG), clamp01(pow(fog.a, gammaCurve)));
   }
 #endif

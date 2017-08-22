@@ -46,6 +46,7 @@ varying vec3 worldpos;
   #endif
 
   uniform float wetness;
+  uniform float rainStrength;
 
   #if SHADER == GBUFFERS_WATER
     uniform float frameTimeCounter;

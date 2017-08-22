@@ -12,9 +12,11 @@
 
 float flengthsqr(in vec2 n) { return dot(n, n); }
 float flengthsqr(in vec3 n) { return dot(n, n); }
+float flengthsqr(in vec4 n) { return dot(n, n); }
 
 float flength(in vec2 n) { return sqrt(flengthsqr(n)); }
 float flength(in vec3 n) { return sqrt(flengthsqr(n)); }
+float flength(in vec4 n) { return sqrt(flengthsqr(n)); }
 
 float flengthinv(in vec3 n) { return inversesqrt(flengthsqr(n)); }
 

@@ -23,6 +23,7 @@
 #define BLOCK_LAPIS vec2(22, 0)
 #define OBSIDIAN vec2(49, 0)
 #define SNOW vec2(80, 0)
+#define WEB vec2(30, 0)
 
 // TRANSPARENT
 #define ICE vec2(79, 0)

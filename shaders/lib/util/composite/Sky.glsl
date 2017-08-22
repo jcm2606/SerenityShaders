@@ -8,6 +8,18 @@
   #include "/lib/util/composite/Stars.glsl"
 #endif
 
-vec3 drawSky(in vec3 view, in int mode) {
-  return js_getScatter(drawStars(view), view, sunVector, mode);
+#if STAGE == COMPOSITE1 || STAGE == COMPOSITE3
+  #ifndef INCLUDED_VOLUMECLOUDS
+    #include "/lib/util/composite/VolumeClouds.glsl"
+  #endif
+#endif
+
+vec3 drawSky(in vec3 view, in vec2 texcoord, in int mode) {
+  vec3 sky = js_getScatter(drawStars(view), view, mode);
+
+  #if STAGE == COMPOSITE1
+    sky = drawVolumeClouds(sky, texcoord);
+  #endif
+
+  return sky;
 }

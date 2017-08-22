@@ -34,6 +34,13 @@ material = 1.0;
       false
     )
   ) material = MATERIAL_FOLIAGE;
+
+  if(
+    entity.x == WEB.x ||
+    (
+      false
+    )
+  ) material = MATERIAL_SUBSURFACE;
 #elif SHADER == GBUFFERS_WATER
   material = MATERIAL_TRANSLUCENT;
 

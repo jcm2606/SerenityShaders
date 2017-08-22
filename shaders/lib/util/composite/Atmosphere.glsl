@@ -57,7 +57,7 @@ vec3 js_sunColor(vec3 V, vec3 L) {
     return absorb(js_getThickness2(L)) * getEarth(L);
 }
 
-vec3 js_getScatter(in vec3 colour, in vec3 V, in vec3 L, in int mode) {
+vec3 js_getScatter(in vec3 colour, in vec3 V, in int mode) {
   vec2 thickness = js_getThickness2(V) / js_steps;
 
   float dotVS = dot(V, sunVector);

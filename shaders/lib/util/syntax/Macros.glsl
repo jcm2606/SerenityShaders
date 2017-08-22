@@ -18,3 +18,7 @@
 #define getLandMask(x) (x < (1.0 - near / far / far))
 
 #define random(x) fract(sin(dot(x, vec2(12.9898, 4.1414))) * 43758.5453)
+
+#define smoothMoonPhase ( (float(worldTime) + float(moonPhase) * 24000.0) * 0.00000595238095238 )
+
+#define compareValues2(a,b,t) ((t.x > 0.5) ? a : b)

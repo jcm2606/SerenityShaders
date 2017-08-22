@@ -31,7 +31,7 @@ float water0(in vec2 position) {
   position *= rot2(0.7);
   height += simplex2D(position * 4.0 + move * 4.0) * 0.125;
 
-  height *= 0.45;
+  height *= mix(0.4, 0.6, rainStrength);
 
   return height;
 }

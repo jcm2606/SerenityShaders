@@ -21,6 +21,7 @@
 
 // CONST
 const bool shadowtex0Mipmap = true;
+const bool colortex6MipmapEnabled = true;
 
 // USED BUFFERS
 #define IN_TEX1
@@ -43,6 +44,8 @@ uniform sampler2D colortex1;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
 uniform sampler2D colortex4;
+uniform sampler2D colortex5;
+uniform sampler2D colortex6;
 
 uniform sampler2D depthtex0;
 uniform sampler2D depthtex1;
@@ -76,6 +79,7 @@ uniform float viewWidth;
 uniform float viewHeight;
 uniform float frameTimeCounter;
 uniform float rainStrength;
+uniform float wetness;
 
 uniform vec3 cameraPosition;
 
@@ -124,7 +128,7 @@ void main() {
   vec3 frame = backSurface.albedo;
 
   // RENDER SKY TO BACK FRAME
-  if(!getLandMask(position.depthBack)) frame = drawSky(normalize(position.viewPositionBack), 0);
+  if(!getLandMask(position.depthBack)) frame = drawSky(normalize(position.viewPositionBack), texcoord, 0);
 
   // CALCULATE LIGHT COLOURS
   mat2x3 lightColours;
@@ -141,9 +145,7 @@ void main() {
   fragment.tex0.rgb = frame;
 
   // SAMPLE FOG
-  vec3 fogColour    = vec3(0.0);
-  fragment.tex5.a   = getFog(fogColour, lightColours[0], lightColours[1]);
-  fragment.tex5.rgb = fogColour;
+  getFog(fragment.tex5, lightColours[0], lightColours[1]);
   
   // SEND FRONT SHADOW DOWN FOR SPECULAR HIGHLIGHT
   fragment.tex0.a = shadingStruct.shadowFront;

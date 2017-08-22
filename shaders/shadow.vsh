@@ -97,7 +97,12 @@ void main() {
     )
   ) material = MATERIAL_FOLIAGE;
 
-  if(entity.x == SNOW.x) material = MATERIAL_SUBSURFACE;
+  if(
+    entity.x == WEB.x ||
+    (
+      false
+    )
+  ) material = MATERIAL_SUBSURFACE;
 
   // TODO: Waving terrain.
 

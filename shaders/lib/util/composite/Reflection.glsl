@@ -52,7 +52,7 @@ float ggx(in vec3 view, in vec3 normal, in vec3 light, in float roughness, in fl
   return max0(dot(normal, light)) * alphaSqr / (pi * pow2(pow2(max0(dot(normal, halfVector))) * (alphaSqr - 1.0) + 1.0)) * fresnelSchlick(dot(halfVector, light), f0) / (pow2(max0(dot(light, halfVector))) * (1.0 - k2) + k2);
 }
 
-vec3 drawReflection(in vec3 diffuse, in vec3 direct) {
+vec3 drawReflection(in vec3 diffuse, in vec3 direct, in vec3 ambient) {
   vec4 reflection = vec4(0.0);
 
   vec3 viewdir = -fnormalize(position.viewPositionFront);
@@ -71,7 +71,13 @@ vec3 drawReflection(in vec3 diffuse, in vec3 direct) {
   reflection.rgb = toHDR(reflection.rgb, COLOUR_RANGE_COMPOSITE);
 
   // SAMPLE SKY IN REFLECTED DIRECTION
-  vec3 sky = drawSky(rview, 1) * 2.0;
+  vec3 sky = drawSky(rview, texcoord, 1) * 2.0;
+  
+  #ifdef VOLUME_CLOUDS_REFLECTION
+    vec4 volumeClouds = getVolumeClouds(reflect(position.viewPositionFront, selectSurface().normal), texcoord, direct, ambient);
+
+    sky = mix(sky, volumeClouds.rgb, clamp01(volumeClouds.a));
+  #endif
 
   // MIX BETWEEN RAYTRACED AND SKY SAMPLES
   reflection.rgb = mix(sky, reflection.rgb, reflection.a);

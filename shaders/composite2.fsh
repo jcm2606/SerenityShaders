@@ -50,6 +50,7 @@ uniform mat4 gbufferModelViewInverse;
 uniform float frameTimeCounter;
 uniform float near;
 uniform float far;
+uniform float rainStrength;
 
 uniform vec3 cameraPosition;
 

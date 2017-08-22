@@ -26,12 +26,36 @@
 // VARYING
 varying vec2 texcoord;
 
+flat varying vec3 sunVector;
+flat varying vec3 moonVector;
+flat varying vec3 lightVector;
+
+flat varying vec4 timeVector;
+
 // UNIFORM
 uniform sampler2D depthtex0;
 uniform sampler2D depthtex1;
 
+uniform sampler2D noisetex;
+
 uniform float near;
 uniform float far;
+uniform float viewWidth;
+uniform float viewHeight;
+uniform float frameTimeCounter;
+uniform float rainStrength;
+uniform float wetness;
+
+uniform int isEyeInWater;
+uniform int worldTime;
+uniform int moonPhase;
+
+uniform mat4 gbufferProjection;
+uniform mat4 gbufferProjectionInverse;
+uniform mat4 gbufferModelView;
+uniform mat4 gbufferModelViewInverse;
+
+uniform vec3 cameraPosition;
 
 // STRUCT
 #include "/lib/util/Encoding.glsl"
@@ -46,13 +70,27 @@ Position position;
 // ARBITRARY
 // FUNCTIONS
 
+#include "/lib/util/composite/VolumeClouds.glsl"
+
+#include "/lib/util/composite/Atmosphere.glsl"
+
 // MAIN
 void main() {
   // POPULATE STRUCTS
   createFragment(fragment, texcoord);
   createDepths(position, texcoord);
+  createViewPositions(position, texcoord, false, true);
+
+  // GENERATE LIGHTING COLOURS
+  mat2x3 lightColours = mat2x3(0.0);
+
+  #include "/lib/util/composite/LightColours.glsl"
+
+  // GENERATE VOLUMETRIC CLOUDS
+  fragment.tex6 = getVolumeClouds(position.viewPositionBack, texcoord, lightColours[0], lightColours[1]);
   
   // POPULATE OUTGOING BUFFERS
-/* DRAWBUFFERS:5 */
+/* DRAWBUFFERS:56 */
   gl_FragData[0] = fragment.tex5;
+  gl_FragData[1] = fragment.tex6;
 }
