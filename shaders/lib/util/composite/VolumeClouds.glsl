@@ -36,16 +36,22 @@
   float getVolumeCloudNoise(in vec3 rayPos) {
     float cloud = 0.0;
 
-    rayPos *= 0.01;
-    rayPos *= vec3(0.5, 1.0, 0.7);
+    const vec3 scale = vec3(0.5, 1.0, 0.7) * 0.01;
+
+    rayPos *= scale;
 
     rayPos.xz *= rot2(windDirection);
 
-    cloud += pow2(cloudNoiseOctave(rayPos * vec3(1.0, 0.1, 1.0) + (cloudMovement * 0.5)));
-    //cloud += pow2(cloudNoiseOctave(rayPos * 2.0 + (cloudMovement * 2.0))) * 0.5;
-    cloud += pow2(cloudNoiseOctave(rayPos * 4.0 + (cloudMovement * 4.0))) * 0.25;
-    //cloud += pow2(cloudNoiseOctave(rayPos * 8.0 + (cloudMovement * 8.0))) * 0.125;
-    cloud += pow2(cloudNoiseOctave(rayPos * 16.0 + (cloudMovement * 16.0))) * 0.0625;
+    #define octave(size) cloudNoiseOctave(rayPos * size + (cloudMovement * size))
+
+    cloud += cloudNoiseOctave(rayPos * vec3(1.0, 0.1, 1.0) + (cloudMovement * 0.5));
+    cloud += octave(2.0) * 0.5;
+    cloud += octave(4.0) * 0.25;
+    cloud += octave(8.0) * 0.125;
+    cloud += octave(16.0) * 0.0625;
+    cloud += octave(32.0) * 0.03125;
+
+    #undef octave
 
     return cloud;
   }
@@ -64,8 +70,13 @@
     const float cloudCenter = cloudDepth * 0.5 + cloudLowerHeight;
     const float cloudDepthHalf = 1.0 / (cloudDepth * 0.5);
 
+    const float cloudCoverageScale = 0.1;
+    const float cloudCoverageClear = cloudCoverageScale * 0.42;
+    const float cloudCoverageOvercast = cloudCoverageScale * 2.2;
+    const float cloudCoverageRain = cloudCoverageScale * 2.4;
+
     float samples = VOLUME_CLOUDS_SAMPLES;
-    float coverage = mix(mix(0.42, 0.53, clamp01(sin(smoothMoonPhase * pi))), 0.61, wetness) * 1.4;
+    float coverage = mix(mix(cloudCoverageClear, cloudCoverageOvercast, clamp01(sin(smoothMoonPhase * pi))), cloudCoverageRain, wetness) * 1.4;
     const float density = 10.0;
 
     mat4x3 ray;
@@ -125,7 +136,7 @@
 
       cloudFalloff = lightAura * 0.1 + (pow5((pos.y - cloudLowerHeight) / (cloudDepth - 25.0)) * pow((cloudFBM.x), 1.6));
 
-      cloudFBM.x = (cloudFBM.x / (1.0 + cloudFBM.x)) * alphaWeight * mix(1.0, 0.7, timeVector.z);
+      cloudFBM.x = (cloudFBM.x / (1.0 + cloudFBM.x)) * alphaWeight;
 
       cloud.rgb = mix(cloud.rgb, mix(ambient, direct, cloudFalloff) * colourWeight, (1.0 - cloud.a) * cloudFBM.x);
 

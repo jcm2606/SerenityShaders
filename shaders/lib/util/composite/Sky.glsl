@@ -23,7 +23,7 @@
 #endif
 
 vec3 drawSky(in vec3 view, in vec2 texcoord, in int mode) {
-  vec3 sky = js_getScatter(drawStars(view), view, mode);
+  vec3 sky = js_getScatter(drawStars(view), fnormalize(view), mode);
 
   #ifdef VOLUME_CLOUDS
     #if STAGE == COMPOSITE1

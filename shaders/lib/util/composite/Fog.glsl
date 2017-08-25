@@ -11,24 +11,25 @@
     #include "/lib/util/Noise.glsl"
   #endif
 
-  /*
   // Might need this later, when I add transparent tinting.
   float distx(in float dist){
     return (far * (dist - near)) / (dist * (far - near));
   }
-  */
 
   // FOG
-  float getMoisture(in vec3 world, in vec3 view) {
+  float getMoisture(in vec3 world, in float shadowFront, in float shadowBack, in float depthFront) {
     float moisture = 0.0;
 
     // HEIGHT FOG
-    moisture += mix(0.01, 0.5, clamp01(exp2(-max0(world.y - MC_SEA_LEVEL) * 0.01)));
+    moisture += mix(1.0, 4.0, clamp01(exp2(-max0(world.y - MC_SEA_LEVEL) * 2.0)));
 
     // GROUND FOG
     moisture += mix(0.0, 4.0, clamp01(exp2(-max0(world.y - MC_SEA_LEVEL) * 0.4)));
+    
+    // WATER FOG
+    moisture += (isEyeInWater == 1 && shadowBack - shadowFront > 0.0) ? 4.0 : 0.0;
 
-    return moisture * 0.0009;
+    return moisture * 0.001;
   }
 
   // MARCHER
@@ -55,7 +56,7 @@
     #define rayPos ray[2]
     #define rayStep ray[3]
 
-    rayStart = transMAD(worldToShadow, getWorldPosition(vec3(0.0, 0.0, 0.0)));
+    rayStart = transMAD(worldToShadow, getWorldPosition(vec3(0.0)));
     rayEnd = transMAD(worldToShadow, getWorldPosition(position.viewPositionBack));
 
     rayStep = fnormalize(rayEnd - rayStart) * distance(rayEnd, rayStart) * inverseSteps;
@@ -84,13 +85,13 @@
       world += cameraPosition;
 
       depthFront = texture2D(shadowtex0, shadow.xy).x;
-      shadowFront = compareShadow(depthFront, shadow.z);
+      shadowFront = (!getLandMask(position.depthBack)) ? 1.0 : compareShadow(depthFront, shadow.z);
       shadowBack = (!getLandMask(position.depthBack)) ? 1.0 : compareShadow(texture2D(shadowtex1, shadow.xy).x, shadow.z);
       material = texture2D(shadowcolor1, shadow.xy).a;
-      shadowColour = vec3(1.0);
+      shadowColour = (shadowBack - shadowFront > 0.0) ? toHDR(texture2D(shadowcolor0, shadow.xy).rgb, COLOUR_RANGE_SHADOW) : vec3(1.0);
 
-      lightColour += shadowColour * weight;// * ((isWithinThreshold(material, MATERIAL_WATER, 0.01) > 0.5) ? absorbWater(abs(shadowDepth - shadow.z) * 256.0) : 1.0); 
-      moisture += getMoisture(world, view) * weight;
+      lightColour += shadowColour * weight * ((isWithinThreshold(material, MATERIAL_WATER, 0.01) > 0.5) ? absorbWater(max0(shadow.z - depthFront) * 256.0) : vec3(1.0)); 
+      moisture += getMoisture(world, shadowFront, shadowBack, depthFront) * shadowBack * weight;
       occlusion += shadowBack * weight;
     }
 

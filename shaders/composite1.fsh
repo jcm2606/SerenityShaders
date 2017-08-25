@@ -130,7 +130,7 @@ void main() {
   vec3 frame = backSurface.albedo;
 
   // RENDER SKY
-  if(!getLandMask(position.depthBack)) frame = drawSky(normalize(position.viewPositionBack), texcoord, 0);
+  if(!getLandMask(position.depthBack)) frame = drawSky(position.viewPositionBack, texcoord, 0);
 
   // CALCULATE LIGHT COLOURS
   mat2x3 lightColours;
@@ -152,7 +152,7 @@ void main() {
   #endif
   
   // SEND FRONT SHADOW DOWN FOR SPECULAR HIGHLIGHT
-  fragment.tex0.a = shadingStruct.shadowFront;
+  fragment.tex0.a = (!getLandMask(position.depthBack) && getLandMask(position.depthFront)) ? 1.0 : shadingStruct.shadowFront;
 
   // CONVERT FRAME TO LDR
   fragment.tex0.rgb = toLDR(fragment.tex0.rgb, COLOUR_RANGE_COMPOSITE);

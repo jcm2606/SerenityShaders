@@ -13,7 +13,7 @@
 #endif
 
 vec3 drawStars(in vec3 view) {
-  return vec3(0.25) * (
-    pow16(simplex3D(fnormalize(getWorldPosition(view)) * 256.0))
-  );
+  return vec3(0.5) * (pow16(
+    simplex3D( normalize(getWorldPosition(view)) * 128.0 )
+  ));
 }
