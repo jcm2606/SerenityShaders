@@ -5,8 +5,10 @@ Serenity is a shaderpack for Minecraft: Java Edition, that aims to produce a bal
 
 Serenity is developed against Optifine's shaders implementation, and as such makes frequent use of new features that Optifine provides such as the '#include' directive, new uniforms, new macros, and more.
 
+Fair warning, this shader is constantly evolving and progressing. I frequently jump into a "rewrite mode", and end up rewriting the whole shader. Because of this, often there will be some bugs in the shader, as well as incomplete features. I advise that you either contact me via the shaderLABs Discord server, or create an issue on the Github repository, to notify me of any bugs you find.
+
 # INSTALLATION
-To install the latest version, download the .zip archive of the repo. Open the .zip up in any archive viewer, such as WinRAR, and inside should be a folder called "SerenityShaders-master". Inside that folder should be another folder called "Serenity", drag this folder out into your "shaderpacks" folder in order to install Serenity.
+To install the latest version, download the .zip archive of the repo. Open the .zip up in any archive viewer, such as WinRAR, and inside should be a folder called 'SerenityShaders-master'. Simply drop that folder in your 'shaderpacks' folder, and select it in-game.
 
 # FEATURES
 * Custom lighting.
@@ -23,20 +25,20 @@ To install the latest version, download the .zip archive of the repo. Open the .
 * Height fog.
 * Water fog.
 * Cycle fog (day-to-day fog variation).
-* Morning fog.
-* Volumetric mist.
+* Morning fog. (coming soon)
+* Volumetric mist. (coming soon)
 * Coloured volumetric lighting & volumetric caustics.
 * Bloom.
-* Depth-of-Field (coming soon).
-* Volumetric clouds (coming soon).
+* Depth of field.
+* Volumetric clouds.
 
 # CREDIT
 Most of the code, and the entire structure of the shader, is written by me, with inspiration taken from Ebin.
-Volumetric light was originally robobo1221's, however Serenity uses a heavily modified version which incorporates volumetric fog with the volumetric lighting.
-The atmosphere, raytracer and AO are Jodie's, used with permission.
-The PCSS algorithm is loosely based on Continuum's PCSS algorithm.
-
-Really, thanks has to be given to the entire shaderLABs community, and my own lack of satisfaction towards my shaders, for continuing to push me to strive for better and better.
+Volumetric light is written by me, with inspiration taken from Zombye and BruceKnowsHow for the marcher.
+Volumetric clouds are heavily inspired by BruceKnowsHow and DatWeirdPerson.
+Depth of field belongs to DatWeirdPerson.
+The atmosphere belongs to Jodie.
+PCSS & the percentage-closer filter are based off of Continuum 1.2's PCSS, with several rewrites being done.
 
 # CONTACT
 If you wish to get into contact with me, I advise that you log in to the shaderLABs Discord and leave a message in the Serenity channel.
@@ -45,7 +47,5 @@ https://discord.gg/YkgDv8D Eternal link to the Serenity channel.
 
 # SHADERLABS
 This shader, and its predecessor, Clarity, were both part of the shaderLABs network of shaders. shaderLABs is home to almost all of the Minecraft shader developers, and invites anyone to hop on and discuss really anything with us, with open arms.
-
-https://www.shaderlabs.com/
 
 https://discordapp.com/invite/F4BtNAc Eternal link to the main channel on the shaderLABs Discord.
