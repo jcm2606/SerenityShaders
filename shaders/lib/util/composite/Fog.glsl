@@ -132,14 +132,12 @@
     #undef rayStep
   }
 #elif STAGE == COMPOSITE2
-  vec3 drawFog(in vec3 colour, in vec2 texcoord, in vec2 refractOffset) {
+  vec3 drawFog(in vec3 colour, inout vec4 fog, in vec2 texcoord, in vec2 refractOffset) {
     // SAMPLE THE FOG WITH A 3x3 DEPTH AWARE BOX BLUR
     const int samples = 3;
     const float blurWidth = 0.002 / samples;
     const float threshold = 0.001;
     int blurIterations = 0;
-
-    vec4 fog = vec4(0.0);
 
     float refractCondition = min1(isEyeInWater * frontMaterial.water + (frontMaterial.ice + frontMaterial.stainedGlass));
 
@@ -154,8 +152,10 @@
     }
 
     fog /= blurIterations;
+    fog.rgb = toHDR(fog.rgb, COLOUR_RANGE_FOG);
+    fog.a = clamp01(pow(fog.a, gammaCurve));
 
     //return toHDR(fog.rgb, COLOUR_RANGE_FOG) * clamp01(pow(fog.a, gammaCurve)) + colour;
-    return mix(colour, toHDR(fog.rgb, COLOUR_RANGE_FOG), clamp01(pow(fog.a, gammaCurve)));
+    return mix(colour, fog.rgb, fog.a);
   }
 #endif

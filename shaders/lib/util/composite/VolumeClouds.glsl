@@ -6,7 +6,7 @@
   Please read "License.txt" at the root of the shader pack before making any edits.
 */
 
-#if   STAGE == COMPOSITE || STAGE == COMPOSITE3
+#if   STAGE == COMPOSITE2 || STAGE == COMPOSITE3
   #ifndef INCLUDED_NOISE
     #include "/lib/util/Noise.glsl"
   #endif
@@ -56,11 +56,18 @@
     return cloud;
   }
 
+  vec3 vcWorldToView(in vec3 world) {
+    //vec4 view = gbufferModelView * vec4(world, 1.0);
+    //view /= view.w;
+    return transMAD(gbufferModelView, world);
+    //return view.xyz;
+  }
+
   #define cloudCoverage3D(x, y, z) clamp01((z + x - 1.0) * y)
 
-  vec4 getVolumeClouds(in vec3 view, in vec2 texcoord, in vec3 direct, in vec3 ambient) {
+  vec4 getVolumeClouds(in vec3 view, in vec2 texcoord, in vec3 direct, in vec3 ambient, in vec4 fog, in int mode) {
     ambient *= 0.15;
-    direct *= 4.0;
+    direct *= 2.0;
 
     vec4 cloud = vec4(0.0);
 
@@ -81,7 +88,7 @@
 
     mat4x3 ray;
 
-    vec3 world = getWorldPosition(view);
+    vec3 world = getWorldPosition((mode == 0) ? getViewSpacePosition(texcoord, 1.0) : view);
 
     #define upper      ray[0]
     #define lower      ray[1]
@@ -125,6 +132,8 @@
     float weight = mix(4.5, 0.2, wetness);
 
     for(float f = 0.0; f < samples && cloud.a < 1.0; f++, pos += increment) {
+      if(mode == 0 && vcWorldToView(pos - cameraPosition).z < view.z && position.depthBack < 1.0) break;
+
       cloudAltitudeWeight.x = clamp01(distance(pos.y, cloudCenter) * cloudDepthHalf);
       cloudAltitudeWeight.y = clamp01(distance(pos.y + lightOffset.y, cloudCenter) * cloudDepthHalf);
 
@@ -148,11 +157,15 @@
     #undef step
     #undef pos
 
+    if(mode == 0) cloud.rgb = mix(cloud.rgb, fog.rgb, fog.a);
+
     return cloud;
   }
-#elif STAGE == COMPOSITE1
+#endif
+
+#if STAGE == COMPOSITE3
   vec3 drawVolumeClouds(in vec3 colour, in vec2 texcoord) {
-    vec4 cloud = texture2DLod(colortex6, texcoord, 1);
+    vec4 cloud = texture2DLod(colortex5, texcoord, 1);
 
     return mix(colour, cloud.rgb, cloud.a);
   }

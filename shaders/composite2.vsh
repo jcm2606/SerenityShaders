@@ -22,7 +22,18 @@
 // VARYING
 varying vec2 texcoord;
 
+flat varying vec3 sunVector;
+flat varying vec3 moonVector;
+flat varying vec3 lightVector;
+
+flat varying vec4 timeVector;
+
 // UNIFORM
+uniform vec3 sunPosition;
+uniform vec3 moonPosition;
+
+uniform float sunAngle;
+
 // STRUCT
 // ARBITRARY
 // FUNCTIONS
@@ -31,4 +42,8 @@ void main() {
   texcoord = gl_MultiTexCoord0.xy;
 
   gl_Position = transMAD(gl_ModelViewMatrix, gl_Vertex.xyz).xyzz * diagonal4(gl_ProjectionMatrix) + gl_ProjectionMatrix[3];
+
+  #include "/lib/util/composite/Vectors.glsl"
+
+  #include "/lib/util/Time.glsl"
 }

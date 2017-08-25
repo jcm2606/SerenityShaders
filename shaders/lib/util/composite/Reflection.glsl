@@ -75,7 +75,7 @@ vec3 drawReflection(in vec3 diffuse, in vec3 direct, in vec3 ambient) {
   
   #ifdef VOLUME_CLOUDS
     #ifdef VOLUME_CLOUDS_REFLECTION
-      vec4 volumeClouds = getVolumeClouds(reflect(position.viewPositionFront, selectSurface().normal), texcoord, direct, ambient);
+      vec4 volumeClouds = getVolumeClouds(reflect(position.viewPositionFront, selectSurface().normal), texcoord, direct, ambient, vec4(0.0), 1);
 
       sky = mix(sky, volumeClouds.rgb, clamp01(volumeClouds.a));
     #endif

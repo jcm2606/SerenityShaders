@@ -20,6 +20,8 @@
 #include "/lib/util/PostHeader.glsl"
 
 // CONST
+const bool colortex5MipmapEnabled = true;
+
 // USED BUFFERS
 #define IN_TEX0
 #define IN_TEX1
@@ -42,6 +44,7 @@ uniform sampler2D colortex1;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
 uniform sampler2D colortex4;
+uniform sampler2D colortex5;
 
 uniform sampler2D depthtex0;
 uniform sampler2D depthtex1;
@@ -86,6 +89,10 @@ Position position = POSITION;
 
 #include "/lib/util/Space.glsl"
 
+#ifdef VOLUME_CLOUDS
+  #include "/lib/util/composite/VolumeClouds.glsl"
+#endif
+
 #include "/lib/util/composite/Reflection.glsl"
 
 // MAIN
@@ -110,6 +117,10 @@ void main() {
 
   // DRAW REFLECTIONS
   if(getLandMask(position.depthFront) && isEyeInWater == 0) fragment.tex0.rgb = drawReflection(fragment.tex0.rgb, lightColours[0], lightColours[1]);
+
+  #ifdef VOLUME_CLOUDS
+    fragment.tex0.rgb = drawVolumeClouds(fragment.tex0.rgb, texcoord);
+  #endif
 
   // CONVERT FRAME TO LDR
   fragment.tex0.rgb = toLDR(fragment.tex0.rgb, COLOUR_RANGE_COMPOSITE);

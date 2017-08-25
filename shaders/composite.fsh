@@ -67,13 +67,6 @@ Position position = POSITION;
 
 // ARBITRARY
 // FUNCTIONS
-
-#ifdef VOLUME_CLOUDS
-  #include "/lib/util/composite/Atmosphere.glsl"
-
-  #include "/lib/util/composite/VolumeClouds.glsl"
-#endif
-
 #ifndef INCLUDED_SPACE
   #include "/lib/util/Space.glsl"
 #endif
@@ -84,19 +77,8 @@ void main() {
   createFragment(fragment, texcoord);
   createDepths(position, texcoord);
   createViewPositions(position, texcoord, false, true);
-
-  #ifdef VOLUME_CLOUDS
-    // GENERATE LIGHTING COLOURS
-    mat2x3 lightColours = mat2x3(0.0);
-
-    #include "/lib/util/composite/LightColours.glsl"
-
-    // GENERATE VOLUMETRIC CLOUDS
-    fragment.tex6 = getVolumeClouds(position.viewPositionBack, texcoord, lightColours[0], lightColours[1]);
-  #endif
   
   // POPULATE OUTGOING BUFFERS
-/* DRAWBUFFERS:56 */
+/* DRAWBUFFERS:5 */
   gl_FragData[0] = fragment.tex5;
-  gl_FragData[1] = fragment.tex6;
 }

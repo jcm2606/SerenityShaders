@@ -32,6 +32,12 @@ const bool colortex5MipmapEnabled = true;
 // VARYING
 varying vec2 texcoord;
 
+flat varying vec3 sunVector;
+flat varying vec3 moonVector;
+flat varying vec3 lightVector;
+
+flat varying vec4 timeVector;
+
 // UNIFORM
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
@@ -43,18 +49,26 @@ uniform sampler2D colortex5;
 uniform sampler2D depthtex0;
 uniform sampler2D depthtex1;
 
+uniform sampler2D noisetex;
+
 uniform mat4 gbufferProjection;
 uniform mat4 gbufferProjectionInverse;
+uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
+
+uniform int isEyeInWater;
+uniform int worldTime;
+uniform int moonPhase;
 
 uniform float frameTimeCounter;
 uniform float near;
 uniform float far;
 uniform float rainStrength;
+uniform float wetness;
+uniform float viewWidth;
+uniform float viewHeight;
 
 uniform vec3 cameraPosition;
-
-uniform int isEyeInWater;
 
 // STRUCT
 #include "/lib/util/Encoding.glsl"
@@ -87,6 +101,12 @@ Material backMaterial = MATERIAL;
   #include "/lib/util/composite/Fog.glsl"
 #endif
 
+#ifdef VOLUME_CLOUDS
+  #include "/lib/util/composite/Atmosphere.glsl"
+
+  #include "/lib/util/composite/VolumeClouds.glsl"
+#endif
+
 // MAIN
 void main() {
   // POPULATE STRUCTS
@@ -113,15 +133,28 @@ void main() {
   // TINT FRAME WITH FRONT ALBEDO
   fragment.tex0.rgb *= (any(greaterThan(frontSurface.albedo, vec3(0.0)))) ? frontSurface.albedo : vec3(1.0);
 
+  vec4 fog = vec4(0.0);
+
   #ifdef VOLUMETRIC_FOG
     // DRAW FOG
-    fragment.tex0.rgb = drawFog(fragment.tex0.rgb, texcoord, refractOffset);
+    fragment.tex0.rgb = drawFog(fragment.tex0.rgb, fog, texcoord, refractOffset);
+  #endif
+
+  #ifdef VOLUME_CLOUDS
+    // GENERATE LIGHTING COLOURS
+    mat2x3 lightColours = mat2x3(0.0);
+
+    #include "/lib/util/composite/LightColours.glsl"
+
+    // GENERATE VOLUMETRIC CLOUDS
+    fragment.tex5 = getVolumeClouds(position.viewPositionBack, texcoord, lightColours[0], lightColours[1], fog, 0);
   #endif
 
   // CONVERT FRAME TO LDR
   fragment.tex0.rgb = toLDR(fragment.tex0.rgb, COLOUR_RANGE_COMPOSITE);
   
   // POPULATE OUTGOING BUFFERS
-/* DRAWBUFFERS:0 */
+/* DRAWBUFFERS:05 */
   gl_FragData[0] = fragment.tex0;
+  gl_FragData[1] = fragment.tex5;
 }
