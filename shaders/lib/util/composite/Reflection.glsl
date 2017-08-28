@@ -73,9 +73,11 @@ vec3 drawReflection(in vec3 diffuse, in vec3 direct, in vec3 ambient) {
   // SAMPLE SKY IN REFLECTED DIRECTION
   vec3 sky = drawSky(rview, texcoord, 1) * 2.0;
   
+  vec4 volumeClouds = vec4(0.0);
+
   #ifdef VOLUME_CLOUDS
     #ifdef VOLUME_CLOUDS_REFLECTION
-      vec4 volumeClouds = getVolumeClouds(reflect(position.viewPositionFront, selectSurface().normal), texcoord, direct, ambient, vec4(0.0), 1);
+      volumeClouds = getVolumeClouds(reflect(position.viewPositionFront, selectSurface().normal), texcoord, direct, ambient, vec4(0.0), 1);
 
       sky = mix(sky, volumeClouds.rgb, clamp01(volumeClouds.a));
     #endif
@@ -88,7 +90,7 @@ vec3 drawReflection(in vec3 diffuse, in vec3 direct, in vec3 ambient) {
   reflection.rgb *= ((1.0 - f0) * pow5(1.0 - max0(dot(viewdir, fnormalize(rview + viewdir)))) + f0) * max0(1.0 - pow2(roughness * 1.9));
 
   // APPLY SPECULAR HIGHLIGHT
-  reflection.rgb += direct * ggx(fnormalize(position.viewPositionFront), normal, lightVector, roughness, metallic, f0) * fragment.tex0.a;
+  reflection.rgb += direct * ggx(fnormalize(position.viewPositionFront), normal, lightVector, roughness, metallic, f0) * fragment.tex0.a * max0(1.0 - volumeClouds.a);
 
   // APPLY METALLIC TINTING
   reflection.rgb *= (metallic > 0.5) ? selectSurface().albedo : vec3(1.0);

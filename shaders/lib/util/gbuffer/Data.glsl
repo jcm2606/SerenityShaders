@@ -105,7 +105,7 @@ float emissive = 0.0;
     // NEW PBR
     roughness = 1.0 - surfaceSpecular.b;
     f0 = surfaceSpecular.r;
-    emissive = 1.0 - surfaceSpecular.a;
+    emissive = (isWithinThreshold(material, MATERIAL_FOLIAGE, 0.01) > 0.5) ? 0.0 : 1.0 - surfaceSpecular.a;
   #endif
 #elif SHADER == GBUFFERS_ENTITIES
   roughness = 0.8;

@@ -28,6 +28,7 @@ const bool colortex5MipmapEnabled = true;
 #define IN_TEX2
 #define IN_TEX3
 #define IN_TEX4
+#define IN_TEX6
 
 // VARYING
 varying vec2 texcoord;
@@ -45,6 +46,7 @@ uniform sampler2D colortex2;
 uniform sampler2D colortex3;
 uniform sampler2D colortex4;
 uniform sampler2D colortex5;
+uniform sampler2D colortex6;
 
 uniform sampler2D depthtex0;
 uniform sampler2D depthtex1;

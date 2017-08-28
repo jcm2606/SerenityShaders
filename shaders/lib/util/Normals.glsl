@@ -19,12 +19,12 @@ float water0(in vec2 position) {
   position *= 0.35;
   position *= rot2(windDirection);
 
-  vec2 move = swizzle2 * frametime * 0.35;
+  vec2 move = swizzle2 * frametime * 0.15;
   const vec2 stretch = vec2(1.0, 0.75);
 
-  height += simplex2D(position * vec2(1.0, 0.55) + move * 0.5) * 1.0;
-  height += simplex2D(position * vec2(1.0, 0.65) * 1.5 + move * 2.0) * 0.5;
-  height += simplex2D(position * vec2(1.0, 0.75) * 2.0 + move * 4.0) * 0.25;
+  height += simplex2D(position * vec2(1.0, 0.55) + move * 1.0) * 1.0;
+  height += simplex2D(position * vec2(1.0, 0.65) * 1.5 + move * 4.0) * 0.5;
+  height += simplex2D(position * vec2(1.0, 0.75) * 2.0 + move * 8.0) * 0.25;
 
   position *= rot2(windDirection);
   height += simplex2D(position * 4.0 + move * 4.0) * 0.125;
@@ -34,9 +34,50 @@ float water0(in vec2 position) {
   return height;
 }
 
+float water1(in vec2 position) {
+  float height = 0.0;
+
+  position *= 0.75;
+
+  vec2 move = swizzle2 * frametime * 0.55;
+
+  position *= rot2(windDirection);
+  height += simplex2D(move * 1.0 + position);
+
+  position *= rot2(windDirection);
+  height -= simplex2D(move * 1.0 + position * 1.0);
+
+  position *= rot2(windDirection);
+  height += simplex2D(move * 1.0 + position * 1.0);
+
+  position *= rot2(windDirection);
+  height += simplex2D(move * 1.0 + position * 1.0);
+
+  position *= rot2(windDirection);
+  height -= simplex2D(move * 1.0 + position * 1.0);
+
+  position *= rot2(windDirection);
+  height += simplex2D(move * 1.0 + position * 1.0);
+
+  position *= rot2(windDirection);
+  height -= simplex2D(move * 1.0 + position * 1.0);
+
+  position *= rot2(windDirection);
+  height += simplex2D(move * 1.0 + position * 1.0);
+
+  position *= rot2(windDirection);
+  height -= simplex2D(move * 1.0 + position * 1.0);
+
+  height *= mix(0.1, 0.6, rainStrength);
+
+  return height;
+}
+
 float waterHeight(in vec3 position) {
-  #if NORMAL_WATER_TYPE == 0
+  #if   NORMAL_WATER_TYPE == 0
     return water0(position.xz - position.y);
+  #elif NORMAL_WATER_TYPE == 1
+    return water1(position.xz - position.y);
   #else
     return 0.0;
   #endif

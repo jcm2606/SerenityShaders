@@ -72,7 +72,7 @@ void main() {
     gl_Position = transMAD(gl_ModelViewMatrix, gl_Vertex.xyz).xyzz * diagonal4(gl_ProjectionMatrix) + gl_ProjectionMatrix[3];
   #endif
 
-  normalVector = (gl_ModelViewMatrix * gl_Vertex).xyz;;
+  normalVector = (gl_ModelViewMatrix * gl_Vertex).xyz;
 
   ttn = mat3(
     fnormalize(gl_NormalMatrix * at_tangent.xyz),

@@ -24,7 +24,11 @@ varying vec2 texcoord;
 
 varying vec4 colour;
 
+varying vec3 shadowpos;
 varying vec3 worldpos;
+varying vec3 refractpos;
+
+varying mat3 ttn;
 
 flat varying vec2 entity;
 flat varying float material;
@@ -52,15 +56,27 @@ void main() {
 
   vec4 caustic = vec4(0.0);
 
+  mat3 tbn = mat3(
+    ttn[0].x, ttn[1].x, ttn[2].x,
+    ttn[0].y, ttn[1].y, ttn[2].y,
+    ttn[0].z, ttn[1].z, ttn[2].z
+  );
+
   if(material == MATERIAL_WATER || material == MATERIAL_ICE || material == MATERIAL_STAINED_GLASS) caustic.xyz = getNormal(worldpos, material);
 
-  if(material == MATERIAL_WATER || material == MATERIAL_ICE || material == MATERIAL_STAINED_GLASS) caustic.a = mix(pow(1.0 - caustic.y, 5.5) * 0.25, pow2(1.0 - caustic.y), 0.5);
+  if(material == MATERIAL_WATER || material == MATERIAL_ICE || material == MATERIAL_STAINED_GLASS) caustic.a = mix(pow(1.0 - caustic.y, 2.5), pow2(1.0 - caustic.y), 0.5);
 
   if(material == MATERIAL_WATER) {
+    // try refracting in vertex shader
+    float oldArea = flength(dFdx(worldpos)) * flength(dFdy(worldpos));
+    vec3 refractPos = refract(normalize(worldpos), (caustic.xyz * tbn), 1.0003 / 1.3333);
+    float newArea = flength(dFdx(refractPos)) * flength(dFdy(refractPos));
+    float refractCaustic = pow(oldArea / newArea, 0.15);
+
     albedo.rgb *= mix(
       mix(0.09, 0.4, clamp01(getHeight(worldpos, material))),
       0.3,
-      caustic.a
+      refractCaustic * 4.0// + (caustic.a)
     );
   }
 

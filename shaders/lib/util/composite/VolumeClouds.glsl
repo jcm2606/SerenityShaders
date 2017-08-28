@@ -44,7 +44,7 @@
 
     #define octave(size) cloudNoiseOctave(rayPos * size + (cloudMovement * size))
 
-    cloud += cloudNoiseOctave(rayPos * vec3(1.0, 0.1, 1.0) + (cloudMovement * 0.5));
+    cloud += cloudNoiseOctave(rayPos + (cloudMovement * 0.5));
     cloud += octave(2.0) * 0.5;
     cloud += octave(4.0) * 0.25;
     cloud += octave(8.0) * 0.125;
@@ -66,8 +66,8 @@
   #define cloudCoverage3D(x, y, z) clamp01((z + x - 1.0) * y)
 
   vec4 getVolumeClouds(in vec3 view, in vec2 texcoord, in vec3 direct, in vec3 ambient, in vec4 fog, in int mode) {
-    ambient *= 0.15;
-    direct *= 2.0;
+    ambient *= 0.01;
+    direct *= 4.0;
 
     vec4 cloud = vec4(0.0);
 
@@ -128,11 +128,16 @@
     float cloudFalloff = 0.0;
 
     float colourWeight = mix(1.0, 0.7, wetness);
-    float alphaWeight  = mix(0.8, 0.6, wetness);
+    float alphaWeight  = mix(1.0, 0.6, wetness);
     float weight = mix(4.5, 0.2, wetness);
 
+    vec3 tint = vec3(1.0);
+    vec3 marchView = vec3(0.0);
+
     for(float f = 0.0; f < samples && cloud.a < 1.0; f++, pos += increment) {
-      if(mode == 0 && vcWorldToView(pos - cameraPosition).z < view.z && position.depthBack < 1.0) break;
+      marchView = vcWorldToView(pos - cameraPosition);
+
+      if(mode == 0 && marchView.z < view.z && position.depthBack < 1.0) break;
 
       cloudAltitudeWeight.x = clamp01(distance(pos.y, cloudCenter) * cloudDepthHalf);
       cloudAltitudeWeight.y = clamp01(distance(pos.y + lightOffset.y, cloudCenter) * cloudDepthHalf);
@@ -143,11 +148,13 @@
 
       cloudFBM.x = pow(cloudFBM.x, weight);
 
-      cloudFalloff = lightAura * 0.1 + (pow5((pos.y - cloudLowerHeight) / (cloudDepth - 25.0)) * pow((cloudFBM.x), 1.6));
+      cloudFalloff = lightAura * 0.01 + (pow5((pos.y - cloudLowerHeight) / (cloudDepth - 8.0)) * pow((cloudFBM.x), 1.6));
 
       cloudFBM.x = (cloudFBM.x / (1.0 + cloudFBM.x)) * alphaWeight;
 
-      cloud.rgb = mix(cloud.rgb, mix(ambient, direct, cloudFalloff) * colourWeight, (1.0 - cloud.a) * cloudFBM.x);
+      tint = (mode == 0 && marchView.z < position.viewPositionFront.z && position.depthFront < 1.0) ? frontSurface.albedo : vec3(1.0);
+
+      cloud.rgb = mix(cloud.rgb, mix(ambient, direct, cloudFalloff) * colourWeight, (1.0 - cloud.a) * cloudFBM.x) * tint;
 
       cloud.a = cloudFBM.x + cloud.a;
     }
@@ -165,7 +172,16 @@
 
 #if STAGE == COMPOSITE3
   vec3 drawVolumeClouds(in vec3 colour, in vec2 texcoord) {
-    vec4 cloud = texture2DLod(colortex5, texcoord, 1);
+    vec4 cloud = texture2DLod(colortex5, texcoord + (fragment.tex6.rg * 2.0 - 1.0), 1);
+
+    const float cloudDepth = VOLUME_CLOUDS_THICKNESS;
+    const float cloudLowerHeight = VOLUME_CLOUDS_HEIGHT;
+    const float cloudUpperHeight = cloudLowerHeight + cloudDepth;
+    const float cloudCenter = cloudDepth * 0.5 + cloudLowerHeight;
+
+    float horizon = pow(max0(dot(normalize(position.viewPositionBack), (cameraPosition.y < cloudUpperHeight) ? upVector : -upVector)), 0.25);
+
+    cloud.a *= mix(1.0, horizon, clamp01(abs(cloudCenter - cameraPosition.y) * 0.03125));
 
     return mix(colour, cloud.rgb, cloud.a);
   }

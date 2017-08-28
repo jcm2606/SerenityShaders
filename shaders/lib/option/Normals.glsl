@@ -12,7 +12,7 @@
 #define NORMAL_MAP_ANGLE_WET         0.05
 
 // CUSTOM NORMALS
-#define NORMAL_WATER_TYPE 0        // [0]
+#define NORMAL_WATER_TYPE 0        // [0 1]
 #define NORMAL_ICE_TYPE   0        // [0]
 #define NORMAL_STAINEDGLASS_TYPE 0 // [0]
 

@@ -24,13 +24,18 @@ varying vec2 texcoord;
 
 varying vec4 colour;
 
+varying vec3 shadowpos;
 varying vec3 worldpos;
+varying vec3 refractpos;
+
+varying mat3 ttn;
 
 flat varying vec2 entity;
 flat varying float material;
 
 // UNIFORM
 attribute vec4 mc_Entity;
+attribute vec4 at_tangent;
 
 uniform mat4 gbufferProjection;
 uniform mat4 gbufferProjectionInverse;
@@ -108,5 +113,13 @@ void main() {
 
   gl_Position = transMAD(shadowModelView, position).xyzz * diagonal4(gl_ProjectionMatrix) + gl_ProjectionMatrix[3];
 
+  shadowpos = gl_Position.xyz;
+
   gl_Position.xyz = distortShadowPosition(gl_Position.xyz, 0);
+
+  ttn = mat3(
+    fnormalize(gl_NormalMatrix * at_tangent.xyz),
+    fnormalize(gl_NormalMatrix * cross(at_tangent.xyz, gl_Normal.xyz) * at_tangent.w),
+    fnormalize(gl_NormalMatrix * gl_Normal)
+  );
 }

@@ -57,7 +57,7 @@
     #define rayStep ray[3]
 
     rayStart = transMAD(worldToShadow, getWorldPosition(vec3(0.0)));
-    rayEnd = transMAD(worldToShadow, getWorldPosition(position.viewPositionBack));
+    rayEnd = transMAD(worldToShadow, getWorldPosition( (!getLandMask(position.depthBack)) ? getViewSpacePosition(texcoord, distx(64.0)) : position.viewPositionBack ));
 
     rayStep = fnormalize(rayEnd - rayStart) * distance(rayEnd, rayStart) * inverseSteps;
 
@@ -85,12 +85,12 @@
       world += cameraPosition;
 
       depthFront = texture2D(shadowtex0, shadow.xy).x;
-      shadowFront = (!getLandMask(position.depthBack)) ? 1.0 : compareShadow(depthFront, shadow.z);
-      shadowBack = (!getLandMask(position.depthBack)) ? 1.0 : compareShadow(texture2D(shadowtex1, shadow.xy).x, shadow.z);
+      shadowFront = (any(lessThan(shadow.xy, vec2(0.0))) || any(greaterThan(shadow.xy, vec2(1.0)))) ? 1.0 : compareShadow(depthFront, shadow.z);
+      shadowBack = (any(lessThan(shadow.xy, vec2(0.0))) || any(greaterThan(shadow.xy, vec2(1.0)))) ? 1.0 : compareShadow(texture2D(shadowtex1, shadow.xy).x, shadow.z);
       material = texture2D(shadowcolor1, shadow.xy).a;
       shadowColour = (shadowBack - shadowFront > 0.0) ? toHDR(texture2D(shadowcolor0, shadow.xy).rgb, COLOUR_RANGE_SHADOW) : vec3(1.0);
 
-      lightColour += shadowColour * weight * ((isWithinThreshold(material, MATERIAL_WATER, 0.01) > 0.5) ? absorbWater(max0(shadow.z - depthFront) * 256.0) : vec3(1.0)); 
+      lightColour += shadowColour * shadowBack * weight * ((isWithinThreshold(material, MATERIAL_WATER, 0.01) > 0.5) ? absorbWater(max0(shadow.z - depthFront) * 256.0) : vec3(1.0)); 
       moisture += getMoisture(world, shadowFront, shadowBack, depthFront) * shadowBack * weight;
       occlusion += shadowBack * weight;
     }
@@ -155,7 +155,7 @@
     fog.rgb = toHDR(fog.rgb, COLOUR_RANGE_FOG);
     fog.a = clamp01(pow(fog.a, gammaCurve));
 
-    //return toHDR(fog.rgb, COLOUR_RANGE_FOG) * clamp01(pow(fog.a, gammaCurve)) + colour;
+    //return fog.rgb * fog.a + colour;
     return mix(colour, fog.rgb, fog.a);
   }
 #endif

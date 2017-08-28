@@ -126,6 +126,8 @@ void main() {
     // CALCULATE REFRACTION OFFSET
     if(frontMaterial.water > 0.5 || frontMaterial.ice > 0.5 || frontMaterial.stainedGlass > 0.5) refractOffset = getRefractionOffset();
 
+    fragment.tex6.rg = refractOffset * 0.5 + 0.5;
+
     // DRAW REFRACTION
     if(frontMaterial.water > 0.5 || frontMaterial.ice > 0.5 || frontMaterial.stainedGlass > 0.5) fragment.tex0.rgb = drawRefraction(refractOffset);
   #endif
@@ -154,7 +156,8 @@ void main() {
   fragment.tex0.rgb = toLDR(fragment.tex0.rgb, COLOUR_RANGE_COMPOSITE);
   
   // POPULATE OUTGOING BUFFERS
-/* DRAWBUFFERS:05 */
+/* DRAWBUFFERS:056 */
   gl_FragData[0] = fragment.tex0;
   gl_FragData[1] = fragment.tex5;
+  gl_FragData[2] = fragment.tex6;
 }
