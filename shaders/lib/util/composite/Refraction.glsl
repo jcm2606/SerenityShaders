@@ -11,9 +11,8 @@
 #endif
 
 vec2 getRefractionOffset() {
-  float strength  = 0.025;
+  float strength  = 0.02;
         strength /= linearDepth(position.depthFront, near, far) * 0.25;
-        strength *= 0.25;
 
   #ifdef REFRACTION_REALISTIC
     return getNormal(getWorldPosition(position.viewPositionFront) + cameraPosition, frontSurface.material).xy * strength - (frontSurface.normal.xy * ((isEyeInWater == 0) ? 0.039978 : 0.022512378));

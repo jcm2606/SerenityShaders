@@ -68,6 +68,7 @@ void getShadows() {
   float width  = max(0.5E-4, (shadowPositionBack.z - blocker) * 0.01) * penumbraQualityInv;
 
   // SAMPLE SHADOWS WITH PERCENTAGE-CLOSER FILTER
+  const float weight = 1.0 / pow(float(SHADOW_PENUMBRA_QUALITY) * 2.0 + 1.0, 2.0);
   int iter = 0;
 
   vec2 depths = vec2(0.0);
@@ -92,26 +93,24 @@ void getShadows() {
       shadingStruct.shadowDifference += sign(compareShadow(depths.x, shadowPositionBack.z) - compareShadow(depths.y, shadowPositionBack.z));
 
       shadingStruct.material += texture2D(shadowcolor1, distortShadowPosition(coord + shadowPositionBack.xy, 1)).a;
-
-      iter++;
     }
   }
 
   // AVERAGE VALUES
-  shadingStruct.depthBack /= iter;
-  shadingStruct.depthSolid /= iter;
+  shadingStruct.depthBack *= weight;
+  shadingStruct.depthSolid *= weight;
 
-  shadingStruct.shadowFront /= iter;
-  shadingStruct.shadowBack /= iter;
-  shadingStruct.shadowSolid /= iter;
+  shadingStruct.shadowFront *= weight;
+  shadingStruct.shadowBack *= weight;
+  shadingStruct.shadowSolid *= weight;
 
-  shadingStruct.shadowColour /= iter;
+  shadingStruct.shadowColour *= weight;
 
-  shadingStruct.shadowDifference /= iter;
+  shadingStruct.shadowDifference *= weight;
 
   shadingStruct.dist = distance(shadowPositionBack, vec3(shadowPositionFront.xy, shadingStruct.depthSolid));
 
-  shadingStruct.material /= iter;
+  shadingStruct.material *= weight;
 }
 
 vec3 doShading(in vec3 diffuse, in vec3 direct, in vec3 ambient) {

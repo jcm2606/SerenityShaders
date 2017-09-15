@@ -50,7 +50,7 @@ vec3 tonemap(in vec3 colour) {
 
   return tonemapUncharted2(
     #ifdef TONEMAP_COMPARISON
-      (texcoord.x < sin(frametime) * 0.25 + 0.75 - 0.5) ? preset_default : preset_new,
+      (texcoord.x < (sin(frametime) * 0.25 + 0.75) - 0.5) ? preset_default : preset_new,
     #else
       preset_default,
     #endif

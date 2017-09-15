@@ -15,12 +15,21 @@
 
     if(!(coord.x > -0.1 && coord.y > -0.1 && coord.x < 1.1 && coord.y < 1.1)) return bloom;
 
+    const float w0 = sqrt(0.5) * 10.0;
+    #if 0
+    for(int i = 49; i < 49; i++) {
+      vec2 uv = vec2(mod(i, 7), i / 7);
+
+      bloom += pow(toLinear(texture2D(colortex0, (vec2(uv.x - 2.5, uv.y - 3.0) * screenSize + pos) * lod).rgb), vec3(1.5)) * max0(pow2((1.0 - flength(uv - 3.0) * 0.25)) * w0);
+    }
+    #else
     for (int i = 0; i < 7; i++) {
       for (int j = 0; j < 7; j++) {
-        bloom += pow(toLinear(texture2D(colortex0, (pos + vec2(i - 2.5, j - 3) * screenSize) * lod).rgb), vec3(1.5)) * max0(pow2((1.0 - flength(vec2(i - 3, j - 3)) * 0.25)) * sqrt(0.5) * 10.0);
+        //bloom += pow(toLinear(texture2D(colortex0, (pos + vec2(i - 2.5, j - 3) * screenSize) * lod).rgb), vec3(1.5)) * max0(pow2((1.0 - flength(vec2(i - 3, j - 3)) * 0.25)) * sqrt(0.5) * 10.0);
+        bloom += pow(toLinear(texture2D(colortex0, (vec2(i - 2.5, j - 3.0) * screenSize + pos) * lod).rgb), vec3(1.5)) * max0(pow2((1.0 - flength(vec2(i, j) - 3.0) * 0.25)) * w0);
       }
     }
-
+    #endif
     bloom /= 49.0;
 
     return bloom;

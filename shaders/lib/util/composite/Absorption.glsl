@@ -9,5 +9,5 @@
 #define INCLUDED_ABSORPTION
 
 vec3 absorbWater(in float dist) {
-  return pow(waterColor, vec3(dist) * 0.25);
+  return pow(waterColor, vec3(dist) * 0.15);
 }

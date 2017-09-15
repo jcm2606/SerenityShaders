@@ -46,11 +46,11 @@ const float js_steps_inv = 1.0 / js_steps;
 
 vec3 phaseRainbow(float x){
 
-    vec3 a = x + vec3(-1,0,1) * 0.03 + 0.6;
+    vec3 a = (vec3(-1,0,1) * 0.03 + x) + 0.6;
 
-    vec3 b = x + vec3(1,0,-1) * 0.03 + 0.3;
+    vec3 b = (vec3(1,0,-1) * 0.03 + x) + 0.3;
 
-    return exp( -500. * a * a + 2.)+exp( -500. * b * b + 1.);
+    return exp( (-500. * a) * a + 2.)+exp( (-500. * b) * b + 1.);
 }
 
 vec3 js_sunColor(vec3 V, vec3 L) {
@@ -58,7 +58,7 @@ vec3 js_sunColor(vec3 V, vec3 L) {
 }
 
 vec3 js_getScatter(in vec3 colour, in vec3 V, in int mode) {
-  vec2 thickness = js_getThickness2(V) / js_steps;
+  vec2 thickness = js_getThickness2(V) * js_steps_inv;
 
   float dotVS = dot(V, sunVector);
   float dotVM = dot(V, moonVector);
@@ -70,14 +70,14 @@ vec3 js_getScatter(in vec3 colour, in vec3 V, in int mode) {
   vec3 scatterM = scatterCoeff.xyz * phaseRayleigh(dotVM) + (scatterCoeff.w * phaseMie(dotVM));
 
   vec3 js_sunAbsorb = absorb(js_getThickness2(sunVector)*js_steps_inv) * getEarth(sunVector);
-  vec3 js_moonAbsorb = absorb(js_getThickness2(moonVector)*js_steps_inv) * getEarth(moonVector);
+  vec3 js_moonAbsorb = absorb(js_getThickness2(moonVector)*js_steps_inv) * getEarth(moonVector) * moonlight;
   
-  vec3 skyColorS = mode != 0 ? vec3(0.0) : colour + (sin(max0(pow16(dotVS) - 0.9935) / 0.015 * pi) * js_sunAbsorb * 200.0);
-  vec3 skyColorM = mode != 0 ? vec3(0.0) : colour + (max0(pow(dotVM, 5000.0)) * 50.0 * moonlight);
+  vec3 skyColorS = mode != 0 ? vec3(0.0) : (sin(max0(pow16(dotVS) - 0.9935) / 0.015 * pi) * js_sunAbsorb) * 200.0 + colour;
+  vec3 skyColorM = mode != 0 ? vec3(0.0) : (max0(pow(dotVM, 5000.0)) * moonlight) * 50.0 + colour;
 
   for(int i = 0; i < int(js_steps); i++) {
     scatterS *= js_sunAbsorb;
-    scatterM *= js_moonAbsorb * moonlight;
+    scatterM *= js_moonAbsorb;
 
     skyColorS = skyColorS * viewAbsorb + scatterS;
     skyColorM = skyColorM * viewAbsorb + scatterM;

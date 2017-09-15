@@ -90,9 +90,9 @@
       material = texture2D(shadowcolor1, shadow.xy).a;
       shadowColour = (shadowBack - shadowFront > 0.0) ? toHDR(texture2D(shadowcolor0, shadow.xy).rgb, COLOUR_RANGE_SHADOW) : vec3(1.0);
 
-      lightColour += shadowColour * shadowBack * weight * ((isWithinThreshold(material, MATERIAL_WATER, 0.01) > 0.5) ? absorbWater(max0(shadow.z - depthFront) * 256.0) : vec3(1.0)); 
-      moisture += getMoisture(world, shadowFront, shadowBack, depthFront) * shadowBack * weight;
-      occlusion += shadowBack * weight;
+      lightColour = (shadowColour * weight) * ((isWithinThreshold(material, MATERIAL_WATER, 0.01) > 0.5) ? absorbWater(max0(shadow.z - depthFront) * 256.0) : vec3(1.0)) + lightColour; 
+      moisture = getMoisture(world, shadowFront, shadowBack, depthFront) * weight + moisture;
+      occlusion = shadowBack * weight + occlusion;
     }
 
     #undef shadow
@@ -106,16 +106,16 @@
     #undef material
 
     // CYCLE FOG
-    moisture += max0(sin(smoothMoonPhase * pi)) * 0.005;
+    moisture = max0(sin(smoothMoonPhase * pi)) * 0.005 + moisture;
 
     // RAIN FOG
-    moisture += wetness * 0.004;
+    moisture = wetness * 0.004 + moisture;
 
     fogOut.a = occlusion * moisture;
 
     fogOut.rgb = lightColour * (
-      direct * FOG_LIGHTING_DIRECT_CONTRIBUTION * max(0.05, pow5(dot(normalize(position.viewPositionBack), lightVector))) +
-      ambient * FOG_LIGHTING_AMBIENT_CONTRIBUTION
+      (direct * FOG_LIGHTING_DIRECT_CONTRIBUTION) * max(0.05, pow5(dot(normalize(position.viewPositionBack), lightVector))) +
+      (ambient * FOG_LIGHTING_AMBIENT_CONTRIBUTION)
     );
 
     fogOut *= finalMultiplier;
@@ -134,7 +134,7 @@
 #elif STAGE == COMPOSITE2
   vec3 drawFog(in vec3 colour, inout vec4 fog, in vec2 texcoord, in vec2 refractOffset) {
     // SAMPLE THE FOG WITH A 3x3 DEPTH AWARE BOX BLUR
-    const int samples = 3;
+    const int samples = 2;
     const float blurWidth = 0.002 / samples;
     const float threshold = 0.001;
     int blurIterations = 0;

@@ -66,13 +66,16 @@ void main() {
 
   if(material == MATERIAL_WATER || material == MATERIAL_ICE || material == MATERIAL_STAINED_GLASS) caustic.a = mix(pow(1.0 - caustic.y, 2.5), pow2(1.0 - caustic.y), 0.5);
 
-  if(material == MATERIAL_WATER) {
-    // try refracting in vertex shader
+  float refractCaustic = 0.0;
+
+  if(material == MATERIAL_WATER || material == MATERIAL_ICE || material == MATERIAL_STAINED_GLASS) {
     float oldArea = flength(dFdx(worldpos)) * flength(dFdy(worldpos));
     vec3 refractPos = refract(normalize(worldpos), (caustic.xyz * tbn), 1.0003 / 1.3333);
     float newArea = flength(dFdx(refractPos)) * flength(dFdy(refractPos));
-    float refractCaustic = pow(oldArea / newArea, 0.15);
+    refractCaustic = pow(oldArea / newArea, 0.15);
+  }
 
+  if(material == MATERIAL_WATER) {
     albedo.rgb *= mix(
       mix(0.09, 0.4, clamp01(getHeight(worldpos, material))),
       0.3,

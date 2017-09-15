@@ -112,7 +112,7 @@
     } else if(world.y >= 0.0) return cloud;
 
     increment = (lower - upper) / (1.0 + samples);
-    pos = upper + cameraPosition + increment * bayer64(ivec2(int(texcoord.x * viewWidth), int(texcoord.y * viewHeight)));
+    pos = (increment * bayer64(ivec2(int(texcoord.x * viewWidth), int(texcoord.y * viewHeight))) + cameraPosition) + upper;
 
     coverage *= clamp01(1.0 - flengthsqr((pos.xz - cameraPosition.xz) * 0.0001));
 
